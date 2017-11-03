@@ -8,7 +8,8 @@ import utils
 import json
 import os
 
-PATH_TRAIN_BASE = 'E:/ML/SceneClassify/ai_challenger_scene_train_20170904'
+# PATH_TRAIN_BASE = 'E:/ML/SceneClassify/ai_challenger_scene_train_20170904'
+PATH_TRAIN_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_train_20170904'
 PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'scene_train_images_20170904')
 PATH_TRAIN_JSON = os.path.join(PATH_TRAIN_BASE, 'scene_train_annotations_20170904.json')
 PATH_VAL_BASE = 'E:/ML/SceneClassify/ai_challenger_scene_validation_20170908'
@@ -16,7 +17,7 @@ PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'ai_challenger_scene_validation_20
 PATH_WEIGHTS = 'params/weights.h5'
 IM_WIDTH = 224
 IM_HEIGHT = 224
-BATCH_SIZE = 8
+BATCH_SIZE = 128
 CLASSES = 80
 EPOCH = 50
 LEARNING_RATE = 1e-2

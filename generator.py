@@ -15,32 +15,16 @@ from functools import partial
 import keras.backend as K
 
 
-def _count_valid_files_in_directory(directory, white_list_formats, follow_links):
-    """Count files with extension in `white_list_formats` contained in a directory.
-
-    # Arguments
-        directory: absolute path to the directory containing files to be counted
-        white_list_formats: set of strings containing allowed extensions for
-            the files to be counted.
-
-    # Returns
-        the count of files with extension in `white_list_formats` contained in
-        the directory.
-    """
-
-    def _recursive_list(subpath):
-        return sorted(os.walk(subpath, followlinks=follow_links), key=lambda tpl: tpl[0])
-
+def _count_valid_files_in_directory(directory, white_list_formats):
     samples = 0
-    for root, _, files in _recursive_list(directory):
-        for fname in files:
-            is_valid = False
-            for extension in white_list_formats:
-                if fname.lower().endswith('.' + extension):
-                    is_valid = True
-                    break
-            if is_valid:
-                samples += 1
+    for fname in os.listdir(directory):
+        is_valid = False
+        for extension in white_list_formats:
+            if fname.lower().endswith('.' + extension):
+                is_valid = True
+                break
+        if is_valid:
+            samples += 1
     return samples
 
 
@@ -96,11 +80,7 @@ class SenceDirectoryIterator(Iterator):
         self.num_class = len(classes)
         self.class_indices = dict(zip(classes, range(len(classes))))
 
-        pool = multiprocessing.pool.ThreadPool()
-        function_partial = partial(_count_valid_files_in_directory,
-                                   white_list_formats=white_list_formats,
-                                   follow_links=follow_links)
-        self.samples = sum(pool.map(function_partial, [directory]))
+        self.samples = _count_valid_files_in_directory(directory, white_list_formats)
 
         print('Found %d images belonging to %d classes.' % (self.samples, self.num_class))
 
@@ -109,10 +89,9 @@ class SenceDirectoryIterator(Iterator):
         self.filenames = []
         self.classes = np.zeros((self.samples,), dtype='int32')
         for i, filename in enumerate(os.listdir(directory)):
+            # if filename.split('.')[-1] in white_list_formats:
             self.classes[i] = image2label[filename]
             self.filenames.append(filename)
-        pool.close()
-        pool.join()
         super(SenceDirectoryIterator, self).__init__(self.samples, batch_size, shuffle, seed)
 
     def next(self):
