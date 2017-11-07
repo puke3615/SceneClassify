@@ -11,3 +11,7 @@ with open(path) as f:
     image2label = {d['image_id']: int(d['label_id']) for d in a}
     print(type(image2label['79f993ae0858ae238b22968c5934d1ddba585ae4.jpg']))
 
+
+a = False
+
+print(float(a) and 0.1)

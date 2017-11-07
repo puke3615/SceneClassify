@@ -18,24 +18,27 @@ PATH_TRAIN_JSON = os.path.join(PATH_TRAIN_BASE, 'scene_train_annotations_2017090
 PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'scene_validation_images_20170908')
 PATH_VAL_JSON = os.path.join(PATH_VAL_BASE, 'scene_validation_annotations_20170908.json')
 PATH_WEIGHTS = 'params/weights.h5'
-IM_WIDTH = 128
-IM_HEIGHT = 128
+IM_WIDTH = 64
+IM_HEIGHT = 64
 BATCH_SIZE = 128
 CLASSES = 80
 EPOCH = 50
-LEARNING_RATE = 1e-2
+LEARNING_RATE = 1e-1
 
 
 def build_generator(path_image, path_json, train=True):
+    def wrap(value):
+        return float(train) and value
+
     image_generator = ImageDataGenerator(
         samplewise_center=True,
         samplewise_std_normalization=True,
         rescale=1. / 255,
-        rotation_range=15 if train else 0,
-        width_shift_range=0.7 if train else 0,
-        height_shift_range=0.7 if train else 0,
-        shear_range=0.2 if train else 0,
-        zoom_range=0.2 if train else 0,
+        rotation_range=wrap(15.),
+        width_shift_range=wrap(0.7),
+        height_shift_range=wrap(0.7),
+        shear_range=wrap(0.2),
+        zoom_range=wrap(0.2),
         horizontal_flip=train)
 
     return SenceDirectoryIterator(
@@ -54,16 +57,16 @@ if __name__ == '__main__':
     steps_validate = utils.calculate_file_num(PATH_VAL_IMAGES) // BATCH_SIZE
     print('Steps number is %d every epoch.' % steps_per_epoch)
     train_generator = build_generator(PATH_TRAIN_IMAGES, PATH_TRAIN_JSON)
-    val_generator = build_generator(PATH_VAL_IMAGES, PATH_VAL_JSON)
+    val_generator = build_generator(PATH_VAL_IMAGES, PATH_VAL_JSON, train=False)
 
     model = Sequential()
-    model.add(Conv2D(16, (3, 3), activation='relu', input_shape=(IM_HEIGHT, IM_WIDTH, 3)))
+    model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(IM_HEIGHT, IM_WIDTH, 3)))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(BatchNormalization())
-    model.add(Conv2D(32, (3, 3), activation='relu'))
+    model.add(Conv2D(64, (3, 3), activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(BatchNormalization())
-    model.add(Conv2D(32, (3, 3), activation='relu'))
+    model.add(Conv2D(64, (3, 3), activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(BatchNormalization())
     model.add(Flatten())
