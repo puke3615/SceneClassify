@@ -28,7 +28,12 @@ LEARNING_RATE = 1e-2
 
 def build_generator(path_image, path_json, train=True):
     image_generator = ImageDataGenerator(
+        samplewise_center=True,
+        samplewise_std_normalization=True,
         rescale=1. / 255,
+        rotation_range=15 if train else 0,
+        width_shift_range=0.7 if train else 0,
+        height_shift_range=0.7 if train else 0,
         shear_range=0.2 if train else 0,
         zoom_range=0.2 if train else 0,
         horizontal_flip=train)

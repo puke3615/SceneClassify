@@ -59,3 +59,4 @@ if __name__ == '__main__':
                 with open(os.path.join(sub_dir, image), 'w') as new:
                     new.write(old.read())
                     output('Write finish % s' % image)
+    output('Completed.')

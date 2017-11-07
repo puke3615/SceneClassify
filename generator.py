@@ -88,10 +88,14 @@ class SenceDirectoryIterator(Iterator):
 
         self.filenames = []
         self.classes = np.zeros((self.samples,), dtype='int32')
+        offset = 0
         for i, filename in enumerate(os.listdir(directory)):
-            # if filename.split('.')[-1] in white_list_formats:
-            self.classes[i] = image2label[filename]
-            self.filenames.append(filename)
+            if filename.split('.')[-1] in white_list_formats:
+                i += offset
+                self.classes[i] = image2label[filename]
+                self.filenames.append(filename)
+            else:
+                offset -= 1
         super(SenceDirectoryIterator, self).__init__(self.samples, batch_size, shuffle, seed)
 
     def next(self):
