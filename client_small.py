@@ -69,7 +69,7 @@ if __name__ == '__main__':
     sgd = SGD(lr=LEARNING_RATE, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
     if os.path.exists(PATH_WEIGHTS):
-        model.load_weights(PATH_WEIGHTS)
+        model.load_weights(PATH_WEIGHTS, True)
         print('Load weights.h5 successfully.')
     else:
         print('Model params not found.')
