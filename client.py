@@ -11,16 +11,18 @@ import os
 PATH_TRAIN_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_train_20170904'
 PATH_VAL_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_validation_20170908'
 
-PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'classes1')
-PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'classes1')
-PATH_WEIGHTS = 'params/weights.h5'
+PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'scene_train_images_20170904')
+PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'scene_validation_images_20170908')
+# PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'classes1')
+# PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'classes1')
 IM_WIDTH = 128
 IM_HEIGHT = 128
 BATCH_SIZE = 64
 CLASSES = 10
 EPOCH = 50
 LEARNING_RATE = 1e-2
-
+VGG = True
+PATH_WEIGHTS = 'params/vgg16.h5' if VGG else 'params/weights.h5'
 
 def build_generator(path_image, train=True):
     def wrap(value):
@@ -28,9 +30,9 @@ def build_generator(path_image, train=True):
 
     image_generator = ImageDataGenerator(
         rescale=1. / 255,
-        rotation_range=wrap(15.),
         samplewise_center=True,
         samplewise_std_normalization=True,
+        rotation_range=wrap(15.),
         width_shift_range=wrap(0.2),
         height_shift_range=wrap(0.2),
         shear_range=wrap(0.2),
@@ -39,9 +41,8 @@ def build_generator(path_image, train=True):
         preprocessing_function=None,
     )
 
-    return DirectoryIterator(
+    return image_generator.flow_from_directory(
         path_image,
-        image_generator,
         target_size=(IM_WIDTH, IM_HEIGHT),
         batch_size=BATCH_SIZE,
         class_mode='categorical'
@@ -55,17 +56,34 @@ if __name__ == '__main__':
     train_generator = build_generator(PATH_TRAIN_IMAGES)
     val_generator = build_generator(PATH_VAL_IMAGES, train=False)
 
-    model = keras.applications.vgg16.VGG16(include_top=True, weights=None,
-                                           input_shape=(IM_HEIGHT, IM_WIDTH, 3), classes=CLASSES)
-    # model_vgg = keras.applications.VGG16(include_top=False, weights=None, input_shape=(IM_HEIGHT, IM_WIDTH, 3))
-    # model = Sequential(model_vgg.layers)
-    # model.add(Flatten())
-    # model.add(BatchNormalization())
-    # model.add(Dense(4096, activation='relu', name='fc1'))
-    # model.add(BatchNormalization())
-    # model.add(Dense(4096, activation='relu', name='fc2'))
-    # model.add(BatchNormalization())
-    # model.add(Dense(CLASSES, activation='softmax'))
+    if VGG:
+        # model = keras.applications.vgg16.VGG16(include_top=True, weights=None,
+        #                                        input_shape=(IM_HEIGHT, IM_WIDTH, 3), classes=CLASSES)
+        model_vgg = keras.applications.VGG16(include_top=False, weights=None, input_shape=(IM_HEIGHT, IM_WIDTH, 3))
+        model = Sequential(model_vgg.layers)
+        model.add(Flatten())
+        model.add(BatchNormalization())
+        model.add(Dense(4096, activation='relu', name='fc1'))
+        model.add(BatchNormalization())
+        model.add(Dense(4096, activation='relu', name='fc2'))
+        model.add(BatchNormalization())
+        model.add(Dense(CLASSES, activation='softmax'))
+    else:
+        model = Sequential()
+        model.add(Conv2D(32, 3, padding='same', input_shape=(IM_HEIGHT, IM_WIDTH, 3)))
+        model.add(MaxPooling2D())
+        model.add(Conv2D(64, 3, padding='same'))
+        model.add(MaxPooling2D())
+        model.add(Conv2D(64, 3, padding='same'))
+        model.add(MaxPooling2D())
+        model.add(Flatten())
+        model.add(BatchNormalization())
+        model.add(Dense(512, activation='relu', name='fc1'))
+        model.add(BatchNormalization())
+        model.add(Dense(1024, activation='relu', name='fc2'))
+        model.add(BatchNormalization())
+        model.add(Dense(CLASSES, activation='softmax'))
+
     model.summary()
 
     adam = Adam(lr=LEARNING_RATE)
