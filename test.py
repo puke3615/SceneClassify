@@ -1,7 +1,7 @@
-import keras
 
-model = keras.applications.VGG16(weights=None)
-# print model.summary()
-# print model.get_config()
-weights = model.get_weights()
-print weights
+def build_generator(train, v):
+    def wrap(value):
+        return float(train) and value
+    print(wrap(v))
+build_generator(True, 0.5)
+build_generator(False, 0.5)

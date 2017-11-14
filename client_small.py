@@ -9,13 +9,13 @@ from generator import SenceDirectoryIterator
 import utils
 import os
 
-# PATH_TRAIN_BASE = 'E:/ML/SceneClassify/ai_challenger_scene_train_20170904'
-# PATH_VAL_BASE = 'E:/ML/SceneClassify/ai_challenger_scene_validation_20170908'
-PATH_TRAIN_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_train_20170904'
-PATH_VAL_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_validation_20170908'
+PATH_TRAIN_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_train_20170904'
+PATH_VAL_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_validation_20170908'
+# PATH_TRAIN_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_train_20170904'
+# PATH_VAL_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_validation_20170908'
 
-# PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'scene_train_images_20170904')
-PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'classes')
+PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'scene_train_images_20170904')
+# PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'classes')
 PATH_TRAIN_JSON = os.path.join(PATH_TRAIN_BASE, 'scene_train_annotations_20170904.json')
 PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'scene_validation_images_20170908')
 PATH_VAL_JSON = os.path.join(PATH_VAL_BASE, 'scene_validation_annotations_20170908.json')
@@ -39,14 +39,14 @@ def build_generator(path_image, path_json, train=True):
         return float(train) and value
 
     image_generator = ImageDataGenerator(
-        # rescale=1. / 255,
+        rescale=1. / 255,
         rotation_range=wrap(15.),
         width_shift_range=wrap(0.7),
         height_shift_range=wrap(0.7),
         shear_range=wrap(0.2),
         zoom_range=wrap(0.2),
         horizontal_flip=train,
-        preprocessing_function=preprocess,
+        preprocessing_function=None,
     )
 
     return SenceDirectoryIterator(
@@ -77,13 +77,12 @@ if __name__ == '__main__':
     model_vgg = keras.applications.VGG16(include_top=False, weights=None, input_shape=(IM_HEIGHT, IM_WIDTH, 3))
     model = Sequential(model_vgg.layers)
     model.add(Flatten())
-    model(Flatten(name='flatten'))
     model.add(BatchNormalization())
-    model(Dense(4096, activation='relu', name='fc1'))
+    model.add(Dense(4096, activation='relu', name='fc1'))
     model.add(BatchNormalization())
-    model(Dense(4096, activation='relu', name='fc2'))
+    model.add(Dense(4096, activation='relu', name='fc2'))
     model.add(BatchNormalization())
-    model(Dense(CLASSES, activation='softmax'))
+    model.add(Dense(CLASSES, activation='softmax'))
 
     optimizer = Adam(lr=LEARNING_RATE)
     model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])

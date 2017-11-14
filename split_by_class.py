@@ -4,14 +4,18 @@ import csv
 import os
 
 # 源文件路径
-PATH_BASE_DIR = '/Users/zijiao/Desktop/ai_challenger_scene_train_20170904'
+# PATH_BASE_DIR = '/Users/zijiao/Desktop/ai_challenger_scene_train_20170904'
+# PATH_BASE_DIR = 'G:/Dataset/SceneClassify/ai_challenger_scene_train_20170904'
+PATH_BASE_DIR = 'G:/Dataset/SceneClassify/ai_challenger_scene_validation_20170908'
 # 保存文件路径
 PATH_SAVE_DIR = os.path.join(PATH_BASE_DIR, 'classes')
 # 是否按照分类名保存
 SUB_DIR_WITH_NAME = False
 
-PATH_IMAGES = os.path.join(PATH_BASE_DIR, 'scene_train_images_20170904')
-PATH_JSON = os.path.join(PATH_BASE_DIR, 'scene_train_annotations_20170904.json')
+# PATH_IMAGES = os.path.join(PATH_BASE_DIR, 'scene_train_images_20170904')
+# PATH_JSON = os.path.join(PATH_BASE_DIR, 'scene_train_annotations_20170904.json')
+PATH_IMAGES = os.path.join(PATH_BASE_DIR, 'scene_validation_images_20170908')
+PATH_JSON = os.path.join(PATH_BASE_DIR, 'scene_validation_annotations_20170908.json')
 PATH_CSV = os.path.join(PATH_BASE_DIR, 'scene_classes.csv')
 PRINT = True
 
@@ -26,7 +30,7 @@ def output(obj):
 
 
 def parse_labels():
-    with open(PATH_CSV) as f:
+    with open(PATH_CSV, encoding='utf-8') as f:
         return [line[1] for line in csv.reader(f)]
 
 
@@ -55,8 +59,8 @@ if __name__ == '__main__':
         if not os.path.exists(sub_dir):
             os.makedirs(sub_dir)
         for image in images:
-            with open(os.path.join(PATH_IMAGES, image), 'r') as old:
-                with open(os.path.join(sub_dir, image), 'w') as new:
+            with open(os.path.join(PATH_IMAGES, image), 'rb') as old:
+                with open(os.path.join(sub_dir, image), 'wb') as new:
                     new.write(old.read())
                     output('Write finish % s' % image)
     output('Completed.')
