@@ -23,7 +23,7 @@ PATH_WEIGHTS = 'params/weights.h5'
 IM_WIDTH = 128
 IM_HEIGHT = 128
 BATCH_SIZE = 32
-CLASSES = 10
+CLASSES = 80
 EPOCH = 50
 LEARNING_RATE = 1e-2
 
@@ -49,30 +49,30 @@ def build_generator(path_image, path_json, train=True):
         preprocessing_function=preprocess,
     )
 
-    # return SenceDirectoryIterator(
-    #     path_image,
-    #     image_generator,
-    #     path_json,
-    #     target_size=(IM_WIDTH, IM_HEIGHT),
-    #     batch_size=BATCH_SIZE,
-    #     class_mode='categorical'
-    # )
-    return DirectoryIterator(
+    return SenceDirectoryIterator(
         path_image,
         image_generator,
+        path_json,
         target_size=(IM_WIDTH, IM_HEIGHT),
         batch_size=BATCH_SIZE,
         class_mode='categorical'
     )
+    # return DirectoryIterator(
+    #     path_image,
+    #     image_generator,
+    #     target_size=(IM_WIDTH, IM_HEIGHT),
+    #     batch_size=BATCH_SIZE,
+    #     class_mode='categorical'
+    # )
 
 
 if __name__ == '__main__':
     file_num = utils.calculate_file_num(PATH_TRAIN_IMAGES)
     steps_per_epoch = file_num // BATCH_SIZE
-    # steps_validate = utils.calculate_file_num(PATH_VAL_IMAGES) // BATCH_SIZE
+    steps_validate = utils.calculate_file_num(PATH_VAL_IMAGES) // BATCH_SIZE
     print('Steps number is %d every epoch.' % steps_per_epoch)
     train_generator = build_generator(PATH_TRAIN_IMAGES, PATH_TRAIN_JSON)
-    # val_generator = build_generator(PATH_VAL_IMAGES, PATH_VAL_JSON, train=False)
+    val_generator = build_generator(PATH_VAL_IMAGES, PATH_VAL_JSON, train=False)
 
     # model = Sequential()
     # model.add(Conv2D(16, (3, 3), activation='relu', input_shape=(IM_HEIGHT, IM_WIDTH, 3)))
@@ -109,8 +109,8 @@ if __name__ == '__main__':
             steps_per_epoch=steps_per_epoch,
             callbacks=[ModelCheckpoint(PATH_WEIGHTS)],
             epochs=EPOCH,
-            # validation_data=val_generator,
-            # validation_steps=steps_validate,
+            validation_data=val_generator,
+            validation_steps=steps_validate,
         )
     except KeyboardInterrupt:
         print('\nStop by keyboardInterrupt, try saving weights.')
