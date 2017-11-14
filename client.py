@@ -11,8 +11,8 @@ import os
 PATH_TRAIN_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_train_20170904'
 PATH_VAL_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_validation_20170908'
 
-PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'scene_train_images_20170904')
-PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'scene_validation_images_20170908')
+PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'classes')
+PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'classes')
 # PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'classes1')
 # PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'classes1')
 IM_WIDTH = 128
