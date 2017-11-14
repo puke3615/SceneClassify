@@ -18,7 +18,7 @@ PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'classes')
 IM_WIDTH = 128
 IM_HEIGHT = 128
 BATCH_SIZE = 64
-CLASSES = 10
+CLASSES = 80
 EPOCH = 50
 LEARNING_RATE = 1e-2
 VGG = True
@@ -70,11 +70,11 @@ if __name__ == '__main__':
         model.add(Dense(CLASSES, activation='softmax'))
     else:
         model = Sequential()
-        model.add(Conv2D(32, 3, padding='same', input_shape=(IM_HEIGHT, IM_WIDTH, 3)))
+        model.add(Conv2D(32, 3, activation='relu', padding='same', input_shape=(IM_HEIGHT, IM_WIDTH, 3)))
         model.add(MaxPooling2D())
-        model.add(Conv2D(64, 3, padding='same'))
+        model.add(Conv2D(64, 3, activation='relu', padding='same'))
         model.add(MaxPooling2D())
-        model.add(Conv2D(64, 3, padding='same'))
+        model.add(Conv2D(64, 3, activation='relu', padding='same'))
         model.add(MaxPooling2D())
         model.add(Flatten())
         model.add(BatchNormalization())
