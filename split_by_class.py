@@ -8,7 +8,7 @@ PATH_BASE_DIR = '/Users/zijiao/Desktop/ai_challenger_scene_train_20170904'
 # 保存文件路径
 PATH_SAVE_DIR = os.path.join(PATH_BASE_DIR, 'classes')
 # 是否按照分类名保存
-SUB_DIR_WITH_NAME = True
+SUB_DIR_WITH_NAME = False
 
 PATH_IMAGES = os.path.join(PATH_BASE_DIR, 'scene_train_images_20170904')
 PATH_JSON = os.path.join(PATH_BASE_DIR, 'scene_train_annotations_20170904.json')
