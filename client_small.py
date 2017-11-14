@@ -90,8 +90,8 @@ if __name__ == '__main__':
     model = Sequential(model_vgg.layers)
     model.add(Flatten())
     model.add(BatchNormalization())
-    # model.add(Dense(512, activation='relu'))
-    # model.add(BatchNormalization())
+    model.add(Dense(1024, activation='relu'))
+    model.add(BatchNormalization())
     model.add(Dense(CLASSES, activation='softmax'))
 
     # optimizer = SGD(lr=LEARNING_RATE, decay=1e-6, momentum=0.9, nesterov=True)
