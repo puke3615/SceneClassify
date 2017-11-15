@@ -1,3 +1,5 @@
-print('%02d' % 0)
-print('%02d' % 10)
-print('%02d' % 8)
+print chr(56)
+
+
+print chr(0xa5)
+print chr(0xffe5)

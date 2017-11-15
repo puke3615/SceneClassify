@@ -23,7 +23,7 @@ PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'classes1')
 
 IM_WIDTH = 128
 IM_HEIGHT = 128
-BATCH_SIZE = 32
+BATCH_SIZE = 128
 CLASSES = len(os.listdir(PATH_TRAIN_IMAGES))
 EPOCH = 50
 LEARNING_RATE = 1e-2
@@ -80,20 +80,26 @@ if __name__ == '__main__':
         model = Sequential()
         model.add(Conv2D(32, 3, activation='relu', padding='same', input_shape=(IM_HEIGHT, IM_WIDTH, 3)))
         model.add(MaxPooling2D())
+        model.add(BatchNormalization())
+        model.add(Conv2D(32, 3, activation='relu', padding='same'))
+        model.add(MaxPooling2D())
+        model.add(BatchNormalization())
         model.add(Conv2D(64, 3, activation='relu', padding='same'))
         model.add(MaxPooling2D())
-        # model.add(Conv2D(64, 3, activation='relu', padding='same'))
-        # model.add(MaxPooling2D())
-        model.add(Flatten())
-        model.add(Dense(512, activation='relu', name='fc1'))
         model.add(BatchNormalization())
-        # model.add(Dense(1024, activation='relu', name='fc2'))
+        model.add(Conv2D(64, 3, activation='relu', padding='same'))
+        model.add(MaxPooling2D())
+        model.add(Flatten())
+        model.add(BatchNormalization())
+        # model.add(Dense(1024, activation='relu', name='fc1'))
         # model.add(BatchNormalization())
+        model.add(Dense(1024, activation='relu', name='fc2'))
+        model.add(BatchNormalization())
         model.add(Dense(CLASSES, activation='softmax'))
 
     model.summary()
 
-    adam = Adam(lr=LEARNING_RATE)
+    adam = Nadam(lr=LEARNING_RATE)
     model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
     if os.path.exists(PATH_WEIGHTS):
         model.load_weights(PATH_WEIGHTS, True)
@@ -108,7 +114,7 @@ if __name__ == '__main__':
             steps_per_epoch=steps_per_epoch,
             callbacks=[
                 ModelCheckpoint(PATH_WEIGHTS),
-                StepTensorBoard(PATH_SUMMARY, histogram_freq=200,write_images=True, skip_steps=20)
+                StepTensorBoard(PATH_SUMMARY, skip_steps=20)
             ],
             epochs=EPOCH,
             validation_data=val_generator,
