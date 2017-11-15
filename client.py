@@ -108,7 +108,7 @@ if __name__ == '__main__':
             steps_per_epoch=steps_per_epoch,
             callbacks=[
                 ModelCheckpoint(PATH_WEIGHTS),
-                StepTensorBoard(PATH_SUMMARY, write_images=True, skip_steps=100)
+                StepTensorBoard(PATH_SUMMARY, histogram_freq=200,write_images=True, skip_steps=20)
             ],
             epochs=EPOCH,
             validation_data=val_generator,

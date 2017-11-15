@@ -18,7 +18,7 @@ class StepTensorBoard(TensorBoard):
 
     def on_batch_end(self, batch, logs=None):
         self.steps += 1
-        if self.steps % self.skip_steps == 0:
+        if self.steps == 1 or self.steps % self.skip_steps == 0:
             super(StepTensorBoard, self).on_epoch_end(self.steps, logs)
 
     def on_epoch_end(self, epoch, logs=None):
