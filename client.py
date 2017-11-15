@@ -9,25 +9,26 @@ import keras
 import utils
 import os
 
-# PATH_TRAIN_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_train_20170904'
-# PATH_VAL_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_validation_20170908'
+PATH_TRAIN_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_train_20170904'
+PATH_VAL_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_validation_20170908'
 
-PATH_TRAIN_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_train_20170904'
-PATH_VAL_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_validation_20170908'
+# PATH_TRAIN_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_train_20170904'
+# PATH_VAL_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_validation_20170908'
 
-PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'classes1')
-PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'classes1')
+PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'classes')
+PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'classes')
 
 # PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'scene_train_images_20170904')
 # PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'scene_validation_images_20170908')
 
-IM_WIDTH = 128
-IM_HEIGHT = 128
-BATCH_SIZE = 128
+IM_WIDTH = 224
+IM_HEIGHT = 224
+BATCH_SIZE = 16
 CLASSES = len(os.listdir(PATH_TRAIN_IMAGES))
-EPOCH = 50
-LEARNING_RATE = 1e-2
-VGG = False
+EPOCH = 100
+LEARNING_RATE = 1e-3
+
+VGG = True
 PATH_WEIGHTS = 'params/vgg16.h5' if VGG else 'params/weights.h5'
 PATH_SUMMARY = 'log/vgg16' if VGG else 'log/small'
 
@@ -67,14 +68,13 @@ if __name__ == '__main__':
     if VGG:
         # model = keras.applications.vgg16.VGG16(include_top=True, weights=None,
         #                                        input_shape=(IM_HEIGHT, IM_WIDTH, 3), classes=CLASSES)
-        model_vgg = keras.applications.VGG16(include_top=False, weights=None, input_shape=(IM_HEIGHT, IM_WIDTH, 3))
+        model_vgg = keras.applications.VGG16(include_top=False, weights='imagenet', input_shape=(IM_HEIGHT, IM_WIDTH, 3))
         model = Sequential(model_vgg.layers)
         model.add(Flatten())
+        model.add(Dense(2048, activation='relu', name='fc1'))
         model.add(BatchNormalization())
-        model.add(Dense(4096, activation='relu', name='fc1'))
-        model.add(BatchNormalization())
-        model.add(Dense(4096, activation='relu', name='fc2'))
-        model.add(BatchNormalization())
+        # model.add(Dense(4096, activation='relu', name='fc2'))
+        # model.add(BatchNormalization())
         model.add(Dense(CLASSES, activation='softmax'))
     else:
         model = Sequential()
@@ -114,7 +114,7 @@ if __name__ == '__main__':
             steps_per_epoch=steps_per_epoch,
             callbacks=[
                 ModelCheckpoint(PATH_WEIGHTS),
-                StepTensorBoard(PATH_SUMMARY, skip_steps=20)
+                StepTensorBoard(PATH_SUMMARY, skip_steps=200)
             ],
             epochs=EPOCH,
             validation_data=val_generator,
