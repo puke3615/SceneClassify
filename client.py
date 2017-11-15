@@ -1,28 +1,35 @@
 from keras.preprocessing.image import ImageDataGenerator, DirectoryIterator
-from keras.callbacks import ModelCheckpoint
 from keras.optimizers import *
+from keras.callbacks import *
 from keras.models import *
 from keras.layers import *
+from tensorboard import *
 import keras
 
 import utils
 import os
 
-PATH_TRAIN_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_train_20170904'
-PATH_VAL_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_validation_20170908'
+# PATH_TRAIN_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_train_20170904'
+# PATH_VAL_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_validation_20170908'
 
-PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'classes')
-PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'classes')
-# PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'classes1')
-# PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'classes1')
+PATH_TRAIN_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_train_20170904'
+PATH_VAL_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_validation_20170908'
+
+PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'classes1')
+PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'classes1')
+
+# PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'scene_train_images_20170904')
+# PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'scene_validation_images_20170908')
+
 IM_WIDTH = 128
 IM_HEIGHT = 128
-BATCH_SIZE = 64
-CLASSES = 80
+BATCH_SIZE = 32
+CLASSES = len(os.listdir(PATH_TRAIN_IMAGES))
 EPOCH = 50
 LEARNING_RATE = 1e-2
-VGG = True
+VGG = False
 PATH_WEIGHTS = 'params/vgg16.h5' if VGG else 'params/weights.h5'
+PATH_SUMMARY = 'log/vgg16' if VGG else 'log/small'
 
 def build_generator(path_image, train=True):
     def wrap(value):
@@ -43,9 +50,10 @@ def build_generator(path_image, train=True):
 
     return image_generator.flow_from_directory(
         path_image,
+        classes=['%02d' % i for i in range(CLASSES)],
         target_size=(IM_WIDTH, IM_HEIGHT),
         batch_size=BATCH_SIZE,
-        class_mode='categorical'
+        class_mode='categorical',
     )
 
 if __name__ == '__main__':
@@ -74,14 +82,13 @@ if __name__ == '__main__':
         model.add(MaxPooling2D())
         model.add(Conv2D(64, 3, activation='relu', padding='same'))
         model.add(MaxPooling2D())
-        model.add(Conv2D(64, 3, activation='relu', padding='same'))
-        model.add(MaxPooling2D())
+        # model.add(Conv2D(64, 3, activation='relu', padding='same'))
+        # model.add(MaxPooling2D())
         model.add(Flatten())
-        model.add(BatchNormalization())
         model.add(Dense(512, activation='relu', name='fc1'))
         model.add(BatchNormalization())
-        model.add(Dense(1024, activation='relu', name='fc2'))
-        model.add(BatchNormalization())
+        # model.add(Dense(1024, activation='relu', name='fc2'))
+        # model.add(BatchNormalization())
         model.add(Dense(CLASSES, activation='softmax'))
 
     model.summary()
@@ -99,12 +106,15 @@ if __name__ == '__main__':
         model.fit_generator(
             train_generator,
             steps_per_epoch=steps_per_epoch,
-            callbacks=[ModelCheckpoint(PATH_WEIGHTS)],
+            callbacks=[
+                ModelCheckpoint(PATH_WEIGHTS),
+                StepTensorBoard(PATH_SUMMARY, write_images=True, skip_steps=100)
+            ],
             epochs=EPOCH,
             validation_data=val_generator,
             validation_steps=steps_validate,
         )
     except KeyboardInterrupt:
-        print('Stop by keyboardInterrupt, try saving weights.')
+        print('\nStop by keyboardInterrupt, try saving weights.')
         model.save_weights(PATH_WEIGHTS)
         print('Save weights successfully.')

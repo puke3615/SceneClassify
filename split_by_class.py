@@ -4,18 +4,21 @@ import csv
 import os
 
 # 源文件路径
-# PATH_BASE_DIR = '/Users/zijiao/Desktop/ai_challenger_scene_train_20170904'
+PATH_BASE_DIR = '/Users/zijiao/Desktop/ai_challenger_scene_train_20170904'
+# PATH_BASE_DIR = '/Users/zijiao/Desktop/ai_challenger_scene_validation_20170908'
+
 # PATH_BASE_DIR = 'G:/Dataset/SceneClassify/ai_challenger_scene_train_20170904'
-PATH_BASE_DIR = 'G:/Dataset/SceneClassify/ai_challenger_scene_validation_20170908'
+# PATH_BASE_DIR = 'G:/Dataset/SceneClassify/ai_challenger_scene_validation_20170908'
 # 保存文件路径
 PATH_SAVE_DIR = os.path.join(PATH_BASE_DIR, 'classes')
 # 是否按照分类名保存
 SUB_DIR_WITH_NAME = False
 
-# PATH_IMAGES = os.path.join(PATH_BASE_DIR, 'scene_train_images_20170904')
-# PATH_JSON = os.path.join(PATH_BASE_DIR, 'scene_train_annotations_20170904.json')
-PATH_IMAGES = os.path.join(PATH_BASE_DIR, 'scene_validation_images_20170908')
-PATH_JSON = os.path.join(PATH_BASE_DIR, 'scene_validation_annotations_20170908.json')
+PATH_IMAGES = os.path.join(PATH_BASE_DIR, 'scene_train_images_20170904')
+PATH_JSON = os.path.join(PATH_BASE_DIR, 'scene_train_annotations_20170904.json')
+
+# PATH_IMAGES = os.path.join(PATH_BASE_DIR, 'scene_validation_images_20170908')
+# PATH_JSON = os.path.join(PATH_BASE_DIR, 'scene_validation_annotations_20170908.json')
 PATH_CSV = os.path.join(PATH_BASE_DIR, 'scene_classes.csv')
 PRINT = True
 
@@ -30,7 +33,7 @@ def output(obj):
 
 
 def parse_labels():
-    with open(PATH_CSV, encoding='utf-8') as f:
+    with open(PATH_CSV) as f:
         return [line[1] for line in csv.reader(f)]
 
 
