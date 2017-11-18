@@ -29,8 +29,8 @@ EPOCH = 100
 LEARNING_RATE = 1e-3
 
 VGG = True
-PATH_WEIGHTS = 'params/vgg16.h5' if VGG else 'params/weights.h5'
-PATH_SUMMARY = 'log/vgg16' if VGG else 'log/small'
+PATH_WEIGHTS = 'params/resnet.h5'
+PATH_SUMMARY = 'log/resnet'
 
 def build_generator(path_image, train=True):
     def wrap(value):
@@ -65,37 +65,16 @@ if __name__ == '__main__':
     train_generator = build_generator(PATH_TRAIN_IMAGES)
     val_generator = build_generator(PATH_VAL_IMAGES, train=False)
 
-    if VGG:
-        # model = keras.applications.vgg16.VGG16(include_top=True, weights=None,
-        #                                        input_shape=(IM_HEIGHT, IM_WIDTH, 3), classes=CLASSES)
-        model_vgg = keras.applications.VGG16(include_top=False, weights='imagenet', input_shape=(IM_HEIGHT, IM_WIDTH, 3))
-        model = Sequential(model_vgg.layers)
-        model.add(Flatten())
-        model.add(Dense(2048, activation='relu', name='fc1'))
-        model.add(BatchNormalization())
-        # model.add(Dense(4096, activation='relu', name='fc2'))
-        # model.add(BatchNormalization())
-        model.add(Dense(CLASSES, activation='softmax'))
-    else:
-        model = Sequential()
-        model.add(Conv2D(32, 3, activation='relu', padding='same', input_shape=(IM_HEIGHT, IM_WIDTH, 3)))
-        model.add(MaxPooling2D())
-        model.add(BatchNormalization())
-        model.add(Conv2D(32, 3, activation='relu', padding='same'))
-        model.add(MaxPooling2D())
-        model.add(BatchNormalization())
-        model.add(Conv2D(64, 3, activation='relu', padding='same'))
-        model.add(MaxPooling2D())
-        model.add(BatchNormalization())
-        model.add(Conv2D(64, 3, activation='relu', padding='same'))
-        model.add(MaxPooling2D())
-        model.add(Flatten())
-        model.add(BatchNormalization())
-        # model.add(Dense(1024, activation='relu', name='fc1'))
-        # model.add(BatchNormalization())
-        model.add(Dense(1024, activation='relu', name='fc2'))
-        model.add(BatchNormalization())
-        model.add(Dense(CLASSES, activation='softmax'))
+    model = keras.applications.resnet50.ResNet50(include_top=True, weights=None,
+                                           input_shape=(IM_HEIGHT, IM_WIDTH, 3), classes=CLASSES)
+    # model_vgg = keras.applications.VGG16(include_top=False, weights='imagenet', input_shape=(IM_HEIGHT, IM_WIDTH, 3))
+    # model = Sequential(model_vgg.layers)
+    # model.add(Flatten())
+    # model.add(Dense(2048, activation='relu', name='fc1'))
+    # model.add(BatchNormalization())
+    # model.add(Dense(4096, activation='relu', name='fc2'))
+    # model.add(BatchNormalization())
+    # model.add(Dense(CLASSES, activation='softmax'))
 
     model.summary()
 
