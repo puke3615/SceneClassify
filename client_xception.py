@@ -103,6 +103,7 @@ if __name__ == '__main__':
             epochs=EPOCH,
             validation_data=val_generator,
             validation_steps=steps_validate,
+            verbose=2,
         )
     except KeyboardInterrupt:
         print('\nStop by keyboardInterrupt, try saving weights.')
