@@ -1,10 +1,9 @@
 from keras.preprocessing.image import ImageDataGenerator, DirectoryIterator
+from keras.applications.resnet50 import ResNet50
 from keras.optimizers import *
 from keras.callbacks import *
-from keras.models import *
 from keras.layers import *
 from tensorboard import *
-import keras
 
 import utils
 import os
@@ -32,6 +31,12 @@ VGG = True
 PATH_WEIGHTS = 'params/resnet.h5'
 PATH_SUMMARY = 'log/resnet'
 
+
+def preprocess(x):
+    x = GaussianNoise(10.)(x)
+    return x
+
+
 def build_generator(path_image, train=True):
     def wrap(value):
         return float(train) and value
@@ -40,13 +45,14 @@ def build_generator(path_image, train=True):
         rescale=1. / 255,
         # samplewise_center=True,
         # samplewise_std_normalization=True,
+        channel_shift_range=wrap(0.1),
         rotation_range=wrap(15.),
         width_shift_range=wrap(0.2),
         height_shift_range=wrap(0.2),
         shear_range=wrap(0.2),
         zoom_range=wrap(0.2),
         horizontal_flip=train,
-        preprocessing_function=None,
+        preprocessing_function=preprocess if train else None,
     )
 
     return image_generator.flow_from_directory(
@@ -57,6 +63,7 @@ def build_generator(path_image, train=True):
         class_mode='categorical',
     )
 
+
 if __name__ == '__main__':
     file_num = utils.calculate_file_num(PATH_TRAIN_IMAGES)
     steps_per_epoch = file_num // BATCH_SIZE
@@ -65,17 +72,8 @@ if __name__ == '__main__':
     train_generator = build_generator(PATH_TRAIN_IMAGES)
     val_generator = build_generator(PATH_VAL_IMAGES, train=False)
 
-    model = keras.applications.resnet50.ResNet50(include_top=True, weights=None,
-                                           input_shape=(IM_HEIGHT, IM_WIDTH, 3), classes=CLASSES)
-    # model_vgg = keras.applications.VGG16(include_top=False, weights='imagenet', input_shape=(IM_HEIGHT, IM_WIDTH, 3))
-    # model = Sequential(model_vgg.layers)
-    # model.add(Flatten())
-    # model.add(Dense(2048, activation='relu', name='fc1'))
-    # model.add(BatchNormalization())
-    # model.add(Dense(4096, activation='relu', name='fc2'))
-    # model.add(BatchNormalization())
-    # model.add(Dense(CLASSES, activation='softmax'))
-
+    model = ResNet50(include_top=True, weights=None,
+                     input_shape=(IM_HEIGHT, IM_WIDTH, 3), classes=CLASSES)
     model.summary()
 
     adam = Nadam(lr=LEARNING_RATE)
