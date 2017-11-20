@@ -1,5 +1,10 @@
-print chr(56)
+import numpy as np
+import heapq
 
-
-print chr(0xa5)
-print chr(0xffe5)
+a = [
+    [2, 1, 3],
+    [4, 9, 5],
+]
+a = np.array(a)
+b = a.argsort()[:, -2:][:, ::-1]
+print(b)

@@ -30,6 +30,7 @@ LEARNING_RATE = 1e-3
 VGG = True
 PATH_WEIGHTS = 'params/resnet.h5'
 PATH_SUMMARY = 'log/resnet'
+DUMP_JSON = False
 
 
 def preprocess(x):
@@ -86,6 +87,11 @@ if __name__ == '__main__':
         print('Load weights.h5 successfully.')
     else:
         print('Model params not found.')
+
+    if DUMP_JSON:
+        import eval
+
+        eval.dump_json(model, val_generator.image_data_generator, IM_WIDTH, IM_HEIGHT)
 
     utils.ensure_dir(os.path.dirname(PATH_WEIGHTS))
     try:
