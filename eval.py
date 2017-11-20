@@ -9,7 +9,7 @@ PATH_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_validation_20170908'
 
 PATH_IMAGE = os.path.join(PATH_BASE, 'scene_validation_images_20170908')
 PATH_REF = os.path.join(PATH_BASE, 'scene_validation_annotations_20170908.json')
-PATH_SUBMIT = 'eval/resnet.json'
+PATH_SUBMIT = 'eval_json/resnet.json'
 
 
 def get_batch(generator, images, width, height):

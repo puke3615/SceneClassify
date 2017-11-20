@@ -4,4 +4,4 @@ __pycache__
 .idea
 /params/
 /log/
-/eval/
+/eval_json/
