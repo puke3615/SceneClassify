@@ -38,7 +38,7 @@ def dump_json(model, generator, width, height, save_path=PATH_SUBMIT, batch_size
         predictions = model.predict(inputs)
         predictions = np.argsort(predictions)
         predictions = predictions[:, -top:][:, ::-1]
-        image_ids = [os.path.basename(image).split('.')[0] for image in images[start: end]]
+        image_ids = [os.path.basename(image) for image in images[start: end]]
         return [{'image_id': image_ids[i], 'label_id': predictions[i, :].tolist()} for i in range(end - start)]
 
     import sys
@@ -120,3 +120,4 @@ if __name__ == '__main__':
     print('Evaluation time of your result: %f s' % (time.time() - START_TIME))
 
     print(result)
+    print('Score is %s' % result['score'])
