@@ -34,7 +34,9 @@ PATH_SUMMARY = 'log/resnet'
 
 def preprocess(x):
     noise = 10.
-    x += np.random.uniform(-noise, noise, x.shape)
+    v_min, v_max = np.min(x), np.max(x)
+    noise = np.random.uniform(-noise, noise, x.shape).astype(np.float32)
+    x = np.clip(x + noise, v_min, v_max)
     return x
 
 
