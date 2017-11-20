@@ -23,7 +23,7 @@ PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'classes')
 
 IM_WIDTH = 299
 IM_HEIGHT = 299
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 CLASSES = len(os.listdir(PATH_TRAIN_IMAGES))
 EPOCH = 100
 LEARNING_RATE = 1e-2
@@ -98,12 +98,12 @@ if __name__ == '__main__':
             steps_per_epoch=steps_per_epoch,
             callbacks=[
                 ModelCheckpoint(PATH_WEIGHTS, mode='max', save_best_only=True),
-                StepTensorBoard(PATH_SUMMARY, skip_steps=200)
+                StepTensorBoard(PATH_SUMMARY, skip_steps=100)
             ],
             epochs=EPOCH,
             validation_data=val_generator,
             validation_steps=steps_validate,
-            verbose=2,
+            verbose=1,
         )
     except KeyboardInterrupt:
         print('\nStop by keyboardInterrupt, try saving weights.')
