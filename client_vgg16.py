@@ -1,10 +1,10 @@
-from keras.preprocessing.image import ImageDataGenerator, DirectoryIterator
+from keras.preprocessing.image import ImageDataGenerator
+from keras.applications import VGG16
 from keras.optimizers import *
 from keras.callbacks import *
 from keras.models import *
 from keras.layers import *
 from tensorboard import *
-import keras
 
 import utils
 import os
@@ -26,7 +26,7 @@ IM_HEIGHT = 224
 BATCH_SIZE = 16
 CLASSES = len(os.listdir(PATH_TRAIN_IMAGES))
 EPOCH = 100
-LEARNING_RATE = 1e-3
+LEARNING_RATE = 1e-2
 
 PATH_WEIGHTS = 'params/vgg16.h5'
 PATH_SUMMARY = 'log/vgg16'
@@ -41,9 +41,10 @@ def build_generator(path_image, train=True):
         rescale=1. / 255,
         # samplewise_center=True,
         # samplewise_std_normalization=True,
+        channel_shift_range=wrap(0.1),
         rotation_range=wrap(15.),
-        # width_shift_range=wrap(0.2),
-        # height_shift_range=wrap(0.2),
+        width_shift_range=wrap(0.2),
+        height_shift_range=wrap(0.2),
         shear_range=wrap(0.2),
         zoom_range=wrap(0.2),
         horizontal_flip=train,
@@ -67,15 +68,16 @@ if __name__ == '__main__':
     train_generator = build_generator(PATH_TRAIN_IMAGES)
     val_generator = build_generator(PATH_VAL_IMAGES, train=False)
 
-    model_vgg = keras.applications.VGG16(include_top=False, weights='imagenet',
-                                         input_shape=(IM_HEIGHT, IM_WIDTH, 3), pooling='avg')
-    model = Sequential(model_vgg.layers)
-    model.add(Dense(4096, activation='relu', name='fc1'))
-    model.add(BatchNormalization())
-    # model.add(Dense(4096, activation='relu', name='fc2'))
-    # model.add(BatchNormalization())
-    model.add(Dense(CLASSES, activation='softmax'))
+    model_vgg16 = VGG16(include_top=False, weights='imagenet',
+                        input_shape=(IM_HEIGHT, IM_WIDTH, 3), pooling='avg')
+    x = model_vgg16.output
+    x = Dense(4096, activation='relu', name='fc1')(x)
+    x = BatchNormalization()(x)
+    x = Dense(4096, activation='relu', name='fc2')(x)
+    x = BatchNormalization()(x)
+    x = Dense(CLASSES, activation='softmax')(x)
 
+    model = Model(inputs=model_vgg16.inputs, outputs=x)
     model.summary()
 
     adam = Nadam(lr=LEARNING_RATE)
