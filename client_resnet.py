@@ -33,7 +33,8 @@ PATH_SUMMARY = 'log/resnet'
 
 
 def preprocess(x):
-    x = GaussianNoise(10.)(x)
+    noise = 10.
+    x += np.random.uniform(-noise, noise, x.shape)
     return x
 
 

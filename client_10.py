@@ -9,11 +9,11 @@ import keras
 import utils
 import os
 
-PATH_TRAIN_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_train_20170904'
-PATH_VAL_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_validation_20170908'
+# PATH_TRAIN_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_train_20170904'
+# PATH_VAL_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_validation_20170908'
 
-# PATH_TRAIN_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_train_20170904'
-# PATH_VAL_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_validation_20170908'
+PATH_TRAIN_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_train_20170904'
+PATH_VAL_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_validation_20170908'
 
 PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'classes10')
 PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'classes10')
@@ -31,6 +31,11 @@ LEARNING_RATE = 1e-2
 PATH_WEIGHTS = 'params/class_10.h5'
 PATH_SUMMARY = 'log/class_10'
 
+def preprocess(x):
+    noise = 10.
+    x += np.random.uniform(-noise, noise, x.shape)
+    return x
+
 def build_generator(path_image, train=True):
     def wrap(value):
         return float(train) and value
@@ -45,7 +50,7 @@ def build_generator(path_image, train=True):
         shear_range=wrap(0.2),
         zoom_range=wrap(0.2),
         horizontal_flip=train,
-        preprocessing_function=None,
+        preprocessing_function=preprocess,
     )
 
     return image_generator.flow_from_directory(
@@ -54,6 +59,7 @@ def build_generator(path_image, train=True):
         target_size=(IM_WIDTH, IM_HEIGHT),
         batch_size=BATCH_SIZE,
         class_mode='categorical',
+        save_to_dir='/Users/zijiao/Desktop/1',
     )
 
 if __name__ == '__main__':
