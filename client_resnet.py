@@ -108,5 +108,5 @@ if __name__ == '__main__':
         )
     except KeyboardInterrupt:
         print('\nStop by keyboardInterrupt, try saving weights.')
-        model.save_weights(PATH_WEIGHTS)
+        # model.save_weights(PATH_WEIGHTS)
         print('Save weights successfully.')

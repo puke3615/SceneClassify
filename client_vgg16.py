@@ -70,6 +70,8 @@ if __name__ == '__main__':
 
     model_vgg16 = VGG16(include_top=False, weights='imagenet',
                         input_shape=(IM_HEIGHT, IM_WIDTH, 3), pooling='avg')
+    for layer in model_vgg16.layers:
+        layer.trainable = False
     x = model_vgg16.output
     x = Dense(4096, activation='relu', name='fc1')(x)
     x = BatchNormalization()(x)
@@ -108,5 +110,5 @@ if __name__ == '__main__':
         )
     except KeyboardInterrupt:
         print('\nStop by keyboardInterrupt, try saving weights.')
-        model.save_weights(PATH_WEIGHTS)
+        # model.save_weights(PATH_WEIGHTS)
         print('Save weights successfully.')
