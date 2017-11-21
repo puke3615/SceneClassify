@@ -96,13 +96,13 @@ if __name__ == '__main__':
             train_generator,
             steps_per_epoch=steps_per_epoch,
             callbacks=[
-                ModelCheckpoint(PATH_WEIGHTS, mode='max', save_best_only=True, verbose=2),
+                ModelCheckpoint(PATH_WEIGHTS, mode='max', save_best_only=True, verbose=1),
                 StepTensorBoard(PATH_SUMMARY, skip_steps=200)
             ],
             epochs=EPOCH,
             validation_data=val_generator,
             validation_steps=steps_validate,
-            verbose=1,
+            verbose=2,
         )
     except KeyboardInterrupt:
         print('\nStop by keyboardInterrupt, try saving weights.')
