@@ -26,7 +26,7 @@ IM_HEIGHT = 299
 BATCH_SIZE = 32
 CLASSES = len(os.listdir(PATH_TRAIN_IMAGES))
 EPOCH = 100
-LEARNING_RATE = 1e-2
+LEARNING_RATE = 2e-3
 
 PATH_WEIGHTS = 'params/xception.h5'
 PATH_SUMMARY = 'log/xception'
