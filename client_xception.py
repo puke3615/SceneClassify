@@ -33,22 +33,30 @@ PATH_SUMMARY = 'log/xception'
 DUMP_JSON = False
 
 
+def preprocess(x):
+    noise = 10.
+    v_min, v_max = np.min(x), np.max(x)
+    noise = np.random.uniform(-noise, noise, x.shape).astype(np.float32)
+    x = np.clip(x + noise, v_min, v_max)
+    return x
+
+
 def build_generator(path_image, train=True):
     def wrap(value):
         return float(train) and value
 
     image_generator = ImageDataGenerator(
         rescale=1. / 255,
-        # samplewise_center=True,
-        # samplewise_std_normalization=True,
-        channel_shift_range=wrap(0.1),
+        samplewise_center=True,
+        samplewise_std_normalization=True,
+        channel_shift_range=wrap(10.),
         rotation_range=wrap(15.),
         width_shift_range=wrap(0.2),
         height_shift_range=wrap(0.2),
         shear_range=wrap(0.2),
         zoom_range=wrap(0.2),
         horizontal_flip=train,
-        preprocessing_function=None,
+        preprocessing_function=preprocess if train else None,
     )
 
     return image_generator.flow_from_directory(

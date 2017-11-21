@@ -47,9 +47,9 @@ def build_generator(path_image, train=True):
 
     image_generator = ImageDataGenerator(
         rescale=1. / 255,
-        # samplewise_center=True,
-        # samplewise_std_normalization=True,
-        channel_shift_range=wrap(0.1),
+        samplewise_center=True,
+        samplewise_std_normalization=True,
+        channel_shift_range=wrap(10.),
         rotation_range=wrap(15.),
         width_shift_range=wrap(0.2),
         height_shift_range=wrap(0.2),
