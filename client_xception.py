@@ -97,7 +97,7 @@ if __name__ == '__main__':
             train_generator,
             steps_per_epoch=steps_per_epoch,
             callbacks=[
-                ModelCheckpoint(PATH_WEIGHTS, mode='max', save_best_only=True),
+                ModelCheckpoint(PATH_WEIGHTS, mode='max', save_best_only=True, verbose=1),
                 StepTensorBoard(PATH_SUMMARY, skip_steps=200)
             ],
             epochs=EPOCH,
