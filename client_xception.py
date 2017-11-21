@@ -26,19 +26,11 @@ IM_HEIGHT = 299
 BATCH_SIZE = 32
 CLASSES = len(os.listdir(PATH_TRAIN_IMAGES))
 EPOCH = 100
-LEARNING_RATE = 2e-3
+LEARNING_RATE = 1e-3
 
 PATH_WEIGHTS = 'params/xception.h5'
 PATH_SUMMARY = 'log/xception'
 DUMP_JSON = False
-
-
-def preprocess(x):
-    noise = 10.
-    v_min, v_max = np.min(x), np.max(x)
-    noise = np.random.uniform(-noise, noise, x.shape).astype(np.float32)
-    x = np.clip(x + noise, v_min, v_max)
-    return x
 
 
 def build_generator(path_image, train=True):
@@ -49,14 +41,14 @@ def build_generator(path_image, train=True):
         rescale=1. / 255,
         # samplewise_center=True,
         # samplewise_std_normalization=True,
-        channel_shift_range=wrap(10.),
+        # channel_shift_range=wrap(10.),
         rotation_range=wrap(15.),
         width_shift_range=wrap(0.2),
         height_shift_range=wrap(0.2),
         shear_range=wrap(0.2),
         zoom_range=wrap(0.2),
         horizontal_flip=train,
-        preprocessing_function=preprocess if train else None,
+        preprocessing_function=None,
     )
 
     return image_generator.flow_from_directory(
@@ -77,7 +69,7 @@ if __name__ == '__main__':
     val_generator = build_generator(PATH_VAL_IMAGES, train=False)
 
     model_xception = Xception(include_top=False, weights='imagenet',
-                        input_shape=(IM_HEIGHT, IM_WIDTH, 3), pooling='avg')
+                              input_shape=(IM_HEIGHT, IM_WIDTH, 3), pooling='avg')
     for layer in model_xception.layers:
         layer.trainable = False
     x = model_xception.output
