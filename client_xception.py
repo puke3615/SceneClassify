@@ -28,7 +28,7 @@ CLASSES = len(os.listdir(PATH_TRAIN_IMAGES))
 EPOCH = 100
 LEARNING_RATE = 1e-3
 
-PATH_WEIGHTS = 'params/xception/{epoch:05d}-{val_loss:.2f}-{val_acc:.4f}.h5'
+PATH_WEIGHTS = 'params/xception/{epoch:05d}-{val_loss:.4f}-{val_acc:.4f}.h5'
 PATH_SUMMARY = 'log/xception'
 DUMP_JSON = False
 
