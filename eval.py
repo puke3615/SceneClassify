@@ -65,7 +65,7 @@ def dump_json(model, generator, width, height, save_path=PATH_SUBMIT, batch_size
         exit(0)
 
 
-def __load_data(submit_file, reference_file):
+def __load_data(submit_file, reference_file, result):
     # load submit result and reference result
 
     with open(submit_file, 'r') as file1:
@@ -102,7 +102,6 @@ def __eval_result(submit_dict, ref_dict, result):
 
 
 def main():
-    global result
     if not os.path.exists(PATH_SUBMIT):
         raise Exception('Submit result "%s" not found. Call dump_json to dump result first.' % PATH_SUBMIT)
     result = {'error': [], 'warning': [], 'score': None}
@@ -110,11 +109,11 @@ def main():
     SUBMIT = {}
     REF = {}
     try:
-        SUBMIT, REF = __load_data(PATH_SUBMIT, PATH_REF)
+        SUBMIT, REF = __load_data(PATH_SUBMIT, PATH_REF, result)
     except Exception as error:
         result['error'].append(str(error))
     try:
-        result = __eval_result(SUBMIT, REF)
+        result = __eval_result(SUBMIT, REF, result)
     except Exception as error:
         result['error'].append(str(error))
     print('Evaluation time of your result: %f s' % (time.time() - START_TIME))
