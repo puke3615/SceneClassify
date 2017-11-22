@@ -29,7 +29,7 @@ EPOCH = 100
 LEARNING_RATE = 2e-3
 
 PATH_WEIGHTS = 'params/xception_trainable.h5'
-PATH_WEIGHTS_SAVED = 'params/xception_trainable.{epoch:02d-{val_loss:.2f}-{val_acc:.4f}.h5'
+PATH_WEIGHTS_SAVED = 'params/xception_trainable.{epoch:02d}-{val_loss:.2f}-{val_acc:.4f}.h5'
 PATH_SUMMARY = 'log/xception_trainable'
 DUMP_JSON = False
 
