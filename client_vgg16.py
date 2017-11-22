@@ -60,14 +60,7 @@ def build_generator(path_image, train=True):
     )
 
 
-if __name__ == '__main__':
-    file_num = utils.calculate_file_num(PATH_TRAIN_IMAGES)
-    steps_per_epoch = file_num // BATCH_SIZE
-    steps_validate = utils.calculate_file_num(PATH_VAL_IMAGES) // BATCH_SIZE
-    print('Steps number is %d every epoch.' % steps_per_epoch)
-    train_generator = build_generator(PATH_TRAIN_IMAGES)
-    val_generator = build_generator(PATH_VAL_IMAGES, train=False)
-
+def build_model(load_weights=True, compile=False):
     model_vgg16 = VGG16(include_top=False, weights='imagenet',
                         input_shape=(IM_HEIGHT, IM_WIDTH, 3), pooling='avg')
     for layer in model_vgg16.layers:
@@ -78,18 +71,29 @@ if __name__ == '__main__':
     x = Dense(4096, activation='relu', name='fc2')(x)
     x = BatchNormalization()(x)
     x = Dense(CLASSES, activation='softmax')(x)
-
     model = Model(inputs=model_vgg16.inputs, outputs=x)
-    model.summary()
+    if compile:
+        adam = Nadam(lr=LEARNING_RATE)
+        model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
+    if load_weights:
+        weights = utils.get_best_weights(os.path.dirname(PATH_WEIGHTS))
+        if weights:
+            model.load_weights(weights, True)
+            print('Load %s successfully.' % weights)
+        else:
+            print('Model params not found.')
+    return model
 
-    adam = Nadam(lr=LEARNING_RATE)
-    model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
-    weights = utils.get_best_weights(os.path.dirname(PATH_WEIGHTS))
-    if weights:
-        model.load_weights(weights, True)
-        print('Load %s successfully.' % weights)
-    else:
-        print('Model params not found.')
+
+if __name__ == '__main__':
+    file_num = utils.calculate_file_num(PATH_TRAIN_IMAGES)
+    steps_per_epoch = file_num // BATCH_SIZE
+    steps_validate = utils.calculate_file_num(PATH_VAL_IMAGES) // BATCH_SIZE
+    print('Steps number is %d every epoch.' % steps_per_epoch)
+    train_generator = build_generator(PATH_TRAIN_IMAGES)
+    val_generator = build_generator(PATH_VAL_IMAGES, train=False)
+
+    model = build_model(compile=True)
 
     if DUMP_JSON:
         import eval

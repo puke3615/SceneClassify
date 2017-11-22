@@ -60,6 +60,22 @@ def build_generator(path_image, train=True):
     )
 
 
+def build_model(load_weights=True, compile=False):
+    model = ResNet50(include_top=True, weights=None,
+                     input_shape=(IM_HEIGHT, IM_WIDTH, 3), classes=CLASSES)
+    if compile:
+        adam = Nadam(lr=LEARNING_RATE)
+        model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
+    if load_weights:
+        weights = utils.get_best_weights(os.path.dirname(PATH_WEIGHTS))
+        if weights:
+            model.load_weights(weights, True)
+            print('Load %s successfully.' % weights)
+        else:
+            print('Model params not found.')
+    return model
+
+
 if __name__ == '__main__':
     file_num = utils.calculate_file_num(PATH_TRAIN_IMAGES)
     steps_per_epoch = file_num // BATCH_SIZE
@@ -68,18 +84,7 @@ if __name__ == '__main__':
     train_generator = build_generator(PATH_TRAIN_IMAGES)
     val_generator = build_generator(PATH_VAL_IMAGES, train=False)
 
-    model = ResNet50(include_top=True, weights=None,
-                     input_shape=(IM_HEIGHT, IM_WIDTH, 3), classes=CLASSES)
-    model.summary()
-
-    adam = Nadam(lr=LEARNING_RATE)
-    model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
-    weights = utils.get_best_weights(os.path.dirname(PATH_WEIGHTS))
-    if weights:
-        model.load_weights(weights, True)
-        print('Load %s successfully.' % weights)
-    else:
-        print('Model params not found.')
+    model = build_model(compile=True)
 
     if DUMP_JSON:
         import eval

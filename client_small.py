@@ -66,14 +66,7 @@ def build_generator(path_image, path_json, train=True):
     # )
 
 
-if __name__ == '__main__':
-    file_num = utils.calculate_file_num(PATH_TRAIN_IMAGES)
-    steps_per_epoch = file_num // BATCH_SIZE
-    steps_validate = utils.calculate_file_num(PATH_VAL_IMAGES) // BATCH_SIZE
-    print('Steps number is %d every epoch.' % steps_per_epoch)
-    train_generator = build_generator(PATH_TRAIN_IMAGES, PATH_TRAIN_JSON)
-    val_generator = build_generator(PATH_VAL_IMAGES, PATH_VAL_JSON, train=False)
-
+def build_model(load_weights=True, compile=False):
     model_vgg = keras.applications.VGG16(include_top=False, weights=None, input_shape=(IM_HEIGHT, IM_WIDTH, 3))
     model = Sequential(model_vgg.layers)
     model.add(Flatten())
@@ -83,14 +76,27 @@ if __name__ == '__main__':
     model.add(Dense(4096, activation='relu', name='fc2'))
     model.add(BatchNormalization())
     model.add(Dense(CLASSES, activation='softmax'))
+    if compile:
+        optimizer = Adam(lr=LEARNING_RATE)
+        model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
+    if load_weights:
+        if os.path.exists(PATH_WEIGHTS):
+            model.load_weights(PATH_WEIGHTS, True)
+            print('Load weights.h5 successfully.')
+        else:
+            print('Model params not found.')
+    return model
 
-    optimizer = Adam(lr=LEARNING_RATE)
-    model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-    if os.path.exists(PATH_WEIGHTS):
-        model.load_weights(PATH_WEIGHTS, True)
-        print('Load weights.h5 successfully.')
-    else:
-        print('Model params not found.')
+
+if __name__ == '__main__':
+    file_num = utils.calculate_file_num(PATH_TRAIN_IMAGES)
+    steps_per_epoch = file_num // BATCH_SIZE
+    steps_validate = utils.calculate_file_num(PATH_VAL_IMAGES) // BATCH_SIZE
+    print('Steps number is %d every epoch.' % steps_per_epoch)
+    train_generator = build_generator(PATH_TRAIN_IMAGES, PATH_TRAIN_JSON)
+    val_generator = build_generator(PATH_VAL_IMAGES, PATH_VAL_JSON, train=False)
+
+    model = build_model(compile=True)
     try:
         utils.ensure_dir(os.path.dirname(PATH_WEIGHTS))
         model.fit_generator(
