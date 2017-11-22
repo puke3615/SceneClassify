@@ -49,3 +49,18 @@ def get_best_weights(path_weights, mode='acc', postfix='.h5'):
     else:
         print('No weights with metric found, choose first file %s.' % target)
     return os.path.join(path_weights, target)
+
+
+def preprocess_image(im, width, height, train=True):
+    from keras.applications.xception import preprocess_input
+    import keras.backend as K
+    import tensorflow as tf
+    size = min(im.shape[:2])
+    im = tf.constant(im)
+    if train:
+        im = tf.random_crop(im, (size, size, 3))
+        im = tf.image.resize_images(im, (width, height))
+    else:
+        im = tf.image.resize_image_with_crop_or_pad(im, height, width)
+    im = K.get_session().run(im)
+    return preprocess_input(im)
