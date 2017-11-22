@@ -26,7 +26,7 @@ IM_HEIGHT = 299
 BATCH_SIZE = 32
 CLASSES = len(os.listdir(PATH_TRAIN_IMAGES))
 EPOCH = 100
-LEARNING_RATE = 2e-3
+LEARNING_RATE = 2e-4
 
 PATH_WEIGHTS = 'params/xception_trainable/{epoch:05d}-{val_loss:.4f}-{val_acc:.4f}.h5'
 PATH_SUMMARY = 'log/xception_trainable'
@@ -40,7 +40,7 @@ def build_generator(path_image, train=True):
     image_generator = ImageDataGenerator(
         # samplewise_center=True,
         # samplewise_std_normalization=True,
-        # channel_shift_range=wrap(10.),
+        channel_shift_range=wrap(25.5),
         rotation_range=wrap(15.),
         width_shift_range=wrap(0.2),
         height_shift_range=wrap(0.2),

@@ -25,7 +25,7 @@ def get_best_weights(path_weights, mode='acc', postfix='.h5'):
     if not sub_files:
         return None
     target = sub_files[0]
-    sub_files_with_metric = filter(lambda f: f.endswith(postfix) and f.__contains__('-'), sub_files)
+    sub_files_with_metric = list(filter(lambda f: f.endswith(postfix) and f.__contains__('-'), sub_files))
     if sub_files_with_metric:
         try:
             weights_value = [file.replace(postfix, '').split('-')[-2:] for file in sub_files_with_metric]
@@ -39,9 +39,9 @@ def get_best_weights(path_weights, mode='acc', postfix='.h5'):
             if mode not in kw:
                 mode = 'acc'
             if mode == 'loss':
-                weights_info = sorted(weights_info, key=lambda x: x['loss'])
+                weights_info = list(sorted(weights_info, key=lambda x: x['loss']))
             elif mode == 'acc':
-                weights_info = sorted(weights_info, key=lambda x: x['acc'], reverse=True)
+                weights_info = list(sorted(weights_info, key=lambda x: x['acc'], reverse=True))
             target = weights_info[0][key_filename]
             print('The best weights is %s, sorted by %s.' % (target, mode))
         except:
