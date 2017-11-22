@@ -28,8 +28,7 @@ CLASSES = len(os.listdir(PATH_TRAIN_IMAGES))
 EPOCH = 100
 LEARNING_RATE = 2e-3
 
-PATH_WEIGHTS = 'params/xception_trainable.h5'
-PATH_WEIGHTS_SAVED = 'params/xception_trainable.{epoch:02d}-{val_loss:.2f}-{val_acc:.4f}.h5'
+PATH_WEIGHTS = 'params/xception_trainable/{epoch:05d}-{val_loss:.2f}-{val_acc:.4f}.h5'
 PATH_SUMMARY = 'log/xception_trainable'
 DUMP_JSON = False
 
@@ -80,9 +79,10 @@ if __name__ == '__main__':
 
     adam = Nadam(lr=LEARNING_RATE)
     model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
-    if os.path.exists(PATH_WEIGHTS):
-        model.load_weights(PATH_WEIGHTS, True)
-        print('Load %s successfully.' % PATH_WEIGHTS)
+    weights = utils.get_best_weights(os.path.dirname(PATH_WEIGHTS))
+    if weights:
+        model.load_weights(weights, True)
+        print('Load %s successfully.' % weights)
     else:
         print('Model params not found.')
 
@@ -97,7 +97,7 @@ if __name__ == '__main__':
             train_generator,
             steps_per_epoch=steps_per_epoch,
             callbacks=[
-                ModelCheckpoint(PATH_WEIGHTS_SAVED, mode='max', save_best_only=True, verbose=1),
+                ModelCheckpoint(PATH_WEIGHTS, verbose=1),
                 StepTensorBoard(PATH_SUMMARY, skip_steps=200)
             ],
             epochs=EPOCH,
@@ -105,7 +105,6 @@ if __name__ == '__main__':
             validation_steps=steps_validate,
             verbose=1,
         )
-        model.save_weights()
     except KeyboardInterrupt:
         print('\nStop by keyboardInterrupt, try saving weights.')
         # model.save_weights(PATH_WEIGHTS)

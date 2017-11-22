@@ -9,7 +9,7 @@ a = np.array(a)
 b = a.argsort()[:, -2:][:, ::-1]
 print(b)
 
-path = 'params/xception.{epoch:02d}-{val_loss:.2f}-{val_acc:.4f}.h5'
+path = 'params/xception.{epoch:05d}-{val_loss:.2f}-{val_acc:.4f}.h5'
 epoch = 10
 logs = {'val_loss': 2.7863322, 'val_acc': 0.654543}
 print(path.format(epoch=epoch, **logs))
