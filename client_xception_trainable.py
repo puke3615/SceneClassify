@@ -47,6 +47,7 @@ def build_generator(path_image, train=True):
         shear_range=wrap(0.2),
         zoom_range=wrap(0.2),
         horizontal_flip=train,
+        fill_mode='reflect',
         preprocessing_function=preprocess_input,
     )
 
@@ -62,7 +63,7 @@ def build_generator(path_image, train=True):
 def build_model(load_weights=True, compile=False):
     model_xception = Xception(include_top=False, weights='imagenet',
                               input_shape=(IM_HEIGHT, IM_WIDTH, 3), pooling='avg')
-    for layer in model_xception.layers[:-1]:
+    for layer in model_xception.layers:
         layer.trainable = False
     x = model_xception.output
     x = Dense(CLASSES, activation='softmax')(x)
