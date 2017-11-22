@@ -25,7 +25,7 @@ def get_batch(generator, images, width, height):
     return result
 
 
-def dump_json(model, generator, width, height, save_path=PATH_SUBMIT, batch_size=16, top=3, stop=True):
+def dump_json(model, generator, width, height, save_path=PATH_SUBMIT, batch_size=16, top=3, stop=True, evaluate=True):
     print('Start dump json...')
     result = []
     images = [os.path.join(PATH_IMAGE, file) for file in os.listdir(PATH_IMAGE)]
@@ -59,6 +59,8 @@ def dump_json(model, generator, width, height, save_path=PATH_SUBMIT, batch_size
     with open(save_path, 'w') as f:
         json.dump(result, f)
         print('Dump finished.')
+    if evaluate:
+        main()
     if stop:
         exit(0)
 
@@ -81,7 +83,7 @@ def __load_data(submit_file, reference_file):
     return submit_dict, ref_dict
 
 
-def __eval_result(submit_dict, ref_dict):
+def __eval_result(submit_dict, ref_dict, result):
     # eval accuracy
 
     right_count = 0
@@ -99,16 +101,14 @@ def __eval_result(submit_dict, ref_dict):
     return result
 
 
-if __name__ == '__main__':
-
+def main():
+    global result
     if not os.path.exists(PATH_SUBMIT):
         raise Exception('Submit result "%s" not found. Call dump_json to dump result first.' % PATH_SUBMIT)
-
     result = {'error': [], 'warning': [], 'score': None}
     START_TIME = time.time()
     SUBMIT = {}
     REF = {}
-
     try:
         SUBMIT, REF = __load_data(PATH_SUBMIT, PATH_REF)
     except Exception as error:
@@ -118,6 +118,9 @@ if __name__ == '__main__':
     except Exception as error:
         result['error'].append(str(error))
     print('Evaluation time of your result: %f s' % (time.time() - START_TIME))
-
     print(result)
     print('Score is %s' % result['score'])
+
+
+if __name__ == '__main__':
+    main()
