@@ -29,6 +29,7 @@ EPOCH = 100
 LEARNING_RATE = 1e-3
 
 PATH_WEIGHTS = 'params/xception.h5'
+PATH_WEIGHTS_SAVED = 'params/xception.{epoch:02d-{val_loss:.2f}-{val_acc:.4f}.h5'
 PATH_SUMMARY = 'log/xception'
 DUMP_JSON = False
 
@@ -97,7 +98,7 @@ if __name__ == '__main__':
             train_generator,
             steps_per_epoch=steps_per_epoch,
             callbacks=[
-                ModelCheckpoint(PATH_WEIGHTS, mode='max', save_best_only=True, verbose=1),
+                ModelCheckpoint(PATH_WEIGHTS_SAVED, mode='max', save_best_only=True, verbose=1),
                 StepTensorBoard(PATH_SUMMARY, skip_steps=200)
             ],
             epochs=EPOCH,
