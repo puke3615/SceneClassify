@@ -26,7 +26,7 @@ IM_HEIGHT = 299
 BATCH_SIZE = 32
 CLASSES = len(os.listdir(PATH_TRAIN_IMAGES))
 EPOCH = 100
-LEARNING_RATE = 2e-4
+LEARNING_RATE = 2e-3
 
 PATH_WEIGHTS = 'params/inception_resnet_v2/{epoch:05d}-{val_loss:.4f}-{val_acc:.4f}.h5'
 PATH_SUMMARY = 'log/inception_resnet_v2'
@@ -47,7 +47,6 @@ def build_generator(path_image, train=True):
         shear_range=wrap(0.2),
         zoom_range=wrap(0.2),
         horizontal_flip=train,
-        fill_mode='reflect',
         preprocessing_function=preprocess_input,
     )
 

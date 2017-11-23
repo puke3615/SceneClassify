@@ -47,7 +47,6 @@ def build_generator(path_image, train=True):
         shear_range=wrap(0.2),
         zoom_range=wrap(0.2),
         horizontal_flip=train,
-        fill_mode='reflect',
         preprocessing_function=preprocess_input,
     )
 
