@@ -38,7 +38,6 @@ def build_generator(path_image, train=True):
         return float(train) and value
 
     image_generator = ImageDataGenerator(
-        rescale=1. / 255,
         # samplewise_center=True,
         samplewise_std_normalization=True,
         channel_shift_range=wrap(25.5),
