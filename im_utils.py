@@ -77,5 +77,5 @@ def random_crop(img, target_size):
     else:
         t = random.randint(0, offset)
         b = t + w
-    img = img.crop((l, t, r, b)).resize([size, size], Image.BOX)
+    img = img.crop((l, t, r, b)).resize([size, size])
     return img
