@@ -38,8 +38,6 @@ def build_generator(path_image, train=True):
         return float(train) and value
 
     image_generator = ImageDataGenerator(
-        # samplewise_center=True,
-        samplewise_std_normalization=True,
         channel_shift_range=wrap(25.5),
         rotation_range=wrap(15.),
         width_shift_range=wrap(0.2),
@@ -47,7 +45,7 @@ def build_generator(path_image, train=True):
         shear_range=wrap(0.2),
         zoom_range=wrap(0.2),
         horizontal_flip=train,
-        preprocessing_function=im_utils.preprocess_input,
+        preprocessing_function=im_utils.default_preprocess_input,
     )
 
     return image_generator.flow_from_directory(

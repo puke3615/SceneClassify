@@ -3,14 +3,11 @@ import numpy as np
 import random
 
 
-def im2array(files, target_size, mode='val', grayscale=False, preprocess=None,
-             normalization=False):
+def im2array(files, target_size, mode='val', grayscale=False, preprocess=None):
     def handle(im):
         im.flags.writeable = True
         if callable(preprocess):
             im = preprocess(im)
-        if normalization:
-            im = std_normalization(im)
         return im
 
     if not isinstance(files, list) and not isinstance(files, tuple):
@@ -95,13 +92,25 @@ def random_crop(img, target_size):
     return img
 
 
-def preprocess_input(x):
-    x = np.divide(x, 250.)
-    x -= 0.5
-    x *= 2.
+def default_preprocess_input(x):
+    return preprocess_input(x, rescale=0 / 255., center=True, normalization=True)
+
+
+def preprocess_input(x, rescale=1 / 255., center=True, normalization=True):
+    if rescale:
+        x *= rescale
+    if center:
+        x = center_handle(x)
+    if normalization:
+        x = std_normalization(x)
     return x
 
 
 def std_normalization(x):
     x /= np.std(x, keepdims=True) + 1e-7
+    return x
+
+
+def center_handle(x):
+    x -= np.mean(x, keepdims=True)
     return x

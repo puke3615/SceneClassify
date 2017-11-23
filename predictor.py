@@ -15,14 +15,13 @@ def parse_prediction(files, predictions, top=3, return_with_prob=False):
 
 
 class Predictor:
-    def __init__(self, func_predict, target_size, mode='val', preprocess=preprocess_input,
-                 normalization=True, top=3, return_with_prob=False):
+    def __init__(self, func_predict, target_size, mode='val', preprocess=default_preprocess_input,
+                 top=3, return_with_prob=False):
         self.func_predict = func_predict
         self.target_size = target_size
         self.mode = mode
         self.top = top
         self.preprocess = preprocess
-        self.normalization = normalization
         self.return_with_prob = return_with_prob
 
     def __call__(self, files, **kwargs):
@@ -33,8 +32,7 @@ class Predictor:
 
     def perform_predict(self, files, **kwargs):
         inputs, patch = im2array(files, self.target_size, self.mode,
-                                 preprocess=self.preprocess,
-                                 normalization=self.normalization)
+                                 preprocess=self.preprocess)
         assert patch * len(files) == len(inputs)
         predictions = self.func_predict(inputs, **kwargs)
         if patch != 1:
@@ -49,7 +47,7 @@ class KerasPredictor(Predictor):
         h, w = model.input_shape[1:3]
         assert h == w, 'Width is not equal with height.'
         super().__init__(model.predict, w, mode,
-                         preprocess, normalization, top, return_with_prob)
+                         preprocess, top, return_with_prob)
 
     def _check_model(self, model):
         func_predict_name = 'predict'
