@@ -1,10 +1,10 @@
-from keras.preprocessing.image import ImageDataGenerator
-from keras.applications import Xception
+from keras.applications.xception import *
 from keras.optimizers import *
 from keras.callbacks import *
 from keras.models import *
 from keras.layers import *
 from tensorboard import *
+from generator import *
 
 import utils
 import os
@@ -26,7 +26,7 @@ IM_HEIGHT = 299
 BATCH_SIZE = 32
 CLASSES = len(os.listdir(PATH_TRAIN_IMAGES))
 EPOCH = 100
-LEARNING_RATE = 1e-3
+LEARNING_RATE = 2e-3
 
 PATH_WEIGHTS = 'params/xception/{epoch:05d}-{val_loss:.4f}-{val_acc:.4f}.h5'
 PATH_SUMMARY = 'log/xception'
@@ -40,15 +40,15 @@ def build_generator(path_image, train=True):
     image_generator = ImageDataGenerator(
         rescale=1. / 255,
         # samplewise_center=True,
-        # samplewise_std_normalization=True,
-        # channel_shift_range=wrap(10.),
+        samplewise_std_normalization=True,
+        channel_shift_range=wrap(25.5),
         rotation_range=wrap(15.),
         width_shift_range=wrap(0.2),
         height_shift_range=wrap(0.2),
         shear_range=wrap(0.2),
         zoom_range=wrap(0.2),
         horizontal_flip=train,
-        preprocessing_function=None,
+        preprocessing_function=preprocess_input,
     )
 
     return image_generator.flow_from_directory(
@@ -57,6 +57,7 @@ def build_generator(path_image, train=True):
         target_size=(IM_WIDTH, IM_HEIGHT),
         batch_size=BATCH_SIZE,
         class_mode='categorical',
+        train=train,
     )
 
 
