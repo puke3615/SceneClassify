@@ -29,7 +29,7 @@ def get_batch(generator, images, width, height):
     return result
 
 
-def dump_json(predictor, generator, width, height, save_path=PATH_SUBMIT, batch_size=16, top=3, stop=True):
+def dump_json(predictor, generator, width, height, save_path=PATH_SUBMIT, batch_size=16, top=3):
     print('Start dump json...')
     if isinstance(predictor, Model):
         predictor = Predictor(predictor)
@@ -65,8 +65,6 @@ def dump_json(predictor, generator, width, height, save_path=PATH_SUBMIT, batch_
     with open(save_path, 'w') as f:
         json.dump(result, f)
         print('Dump finished.')
-    if stop:
-        exit(0)
 
 
 def __load_data(submit_file, reference_file, result):
@@ -126,6 +124,7 @@ def evaluate():
 
 
 DUMP_JSON = True
+EVAL = True
 if __name__ == '__main__':
     if DUMP_JSON:
         integrated_predictor = IntegratedPredictor([
@@ -133,4 +132,5 @@ if __name__ == '__main__':
             # xt.build_model(weights_mode='loss'),
         ])
         dump_json(integrated_predictor, utils.image_generator(train=False), 299, 299)
-    evaluate()
+    if EVAL:
+        evaluate()
