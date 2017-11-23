@@ -1,3 +1,4 @@
+# coding=utf-8
 """Fairly basic set of tools for real-time data augmentation on image data.
 Can easily be extended to include new transformations,
 new preprocessing methods, etc...
@@ -506,7 +507,8 @@ class ImageDataGenerator(object):
                             save_to_dir=None,
                             save_prefix='',
                             save_format='png',
-                            follow_links=False):
+                            follow_links=False,
+                            train=True):
         return DirectoryIterator(
             directory, self,
             target_size=target_size, color_mode=color_mode,
@@ -516,7 +518,8 @@ class ImageDataGenerator(object):
             save_to_dir=save_to_dir,
             save_prefix=save_prefix,
             save_format=save_format,
-            follow_links=follow_links)
+            follow_links=follow_links,
+            train=train)
 
     def standardize(self, x):
         """Apply the normalization configuration to a batch of inputs.
@@ -1148,3 +1151,26 @@ class DirectoryIterator(Iterator):
         # The transformation of images is not under thread lock
         # so it can be done in parallel
         return self._get_batches_of_transformed_samples(index_array)
+
+
+if __name__ == '__main__':
+    # test
+    PATH_TRAIN_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_train_20170904'
+    PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'classes10')
+    image_generator = ImageDataGenerator(
+        rescale=1. / 255,
+        samplewise_center=True,
+        samplewise_std_normalization=True,
+    )
+
+    g = image_generator.flow_from_directory(
+        PATH_TRAIN_IMAGES,
+        target_size=(255, 255),
+        batch_size=1,
+        class_mode='categorical',
+        save_to_dir='/Users/zijiao/Desktop/1',
+        train=False
+    )
+    for i, (x, y) in enumerate(g):
+        if i >= 10:
+            break
