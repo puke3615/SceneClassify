@@ -1,5 +1,6 @@
 import json
 import time
+from predictor import *
 from PIL import Image
 import numpy as np
 import os
@@ -27,6 +28,7 @@ def get_batch(generator, images, width, height):
 
 def dump_json(model, generator, width, height, save_path=PATH_SUBMIT, batch_size=16, top=3, stop=True, evaluate=True):
     print('Start dump json...')
+    predictor = Predictor(model)
     result = []
     images = [os.path.join(PATH_IMAGE, file) for file in os.listdir(PATH_IMAGE)]
     n_images = len(images)
@@ -35,7 +37,7 @@ def dump_json(model, generator, width, height, save_path=PATH_SUBMIT, batch_size
 
     def predict_batch(start, end):
         inputs = get_batch(generator, images[start: end], width, height)
-        predictions = model.predict(inputs)
+        predictions = predictor(inputs)
         predictions = np.argsort(predictions)
         predictions = predictions[:, -top:][:, ::-1]
         image_ids = [os.path.basename(image) for image in images[start: end]]
