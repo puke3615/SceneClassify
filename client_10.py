@@ -30,7 +30,7 @@ LEARNING_RATE = 1e-2
 
 PATH_WEIGHTS = 'params/class_10.h5'
 PATH_SUMMARY = 'log/class_10'
-DUMP_JSON = False
+
 
 def preprocess(x):
     noise = 10.
@@ -38,6 +38,7 @@ def preprocess(x):
     noise = np.random.uniform(-noise, noise, x.shape).astype(np.float32)
     x = np.clip(x + noise, v_min, v_max)
     return x
+
 
 def build_generator(path_image, train=True):
     def wrap(value):
@@ -64,6 +65,7 @@ def build_generator(path_image, train=True):
         class_mode='categorical',
         save_to_dir='/Users/zijiao/Desktop/1',
     )
+
 
 if __name__ == '__main__':
     file_num = utils.calculate_file_num(PATH_TRAIN_IMAGES)
@@ -99,10 +101,6 @@ if __name__ == '__main__':
         print('Load weights.h5 successfully.')
     else:
         print('Model params not found.')
-
-    if DUMP_JSON:
-        import eval
-        eval.dump_json(model, val_generator.image_data_generator, IM_WIDTH, IM_HEIGHT)
 
     utils.ensure_dir(os.path.dirname(PATH_WEIGHTS))
     try:

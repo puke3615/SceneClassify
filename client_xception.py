@@ -6,6 +6,7 @@ from keras.layers import *
 from tensorboard import *
 from generator import *
 
+import im_utils
 import utils
 import os
 
@@ -30,7 +31,6 @@ LEARNING_RATE = 2e-3
 
 PATH_WEIGHTS = 'params/xception/{epoch:05d}-{val_loss:.4f}-{val_acc:.4f}.h5'
 PATH_SUMMARY = 'log/xception'
-DUMP_JSON = False
 
 
 def build_generator(path_image, train=True):
@@ -47,7 +47,7 @@ def build_generator(path_image, train=True):
         shear_range=wrap(0.2),
         zoom_range=wrap(0.2),
         horizontal_flip=train,
-        preprocessing_function=preprocess_input,
+        preprocessing_function=im_utils.preprocess_input,
     )
 
     return image_generator.flow_from_directory(
@@ -92,11 +92,6 @@ if __name__ == '__main__':
     val_generator = build_generator(PATH_VAL_IMAGES, train=False)
 
     model = build_model(compile=True)
-
-    if DUMP_JSON:
-        import eval
-
-        eval.dump_json(model, val_generator.image_data_generator, IM_WIDTH, IM_HEIGHT)
 
     utils.ensure_dir(os.path.dirname(PATH_WEIGHTS))
     try:

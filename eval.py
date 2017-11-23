@@ -16,23 +16,8 @@ PATH_REF = os.path.join(PATH_BASE, 'scene_validation_annotations_20170908.json')
 PATH_SUBMIT = 'eval_json/resnet.json'
 
 
-def get_batch(generator, images, width, height):
-    n_batch = len(images)
-    result = np.zeros([n_batch, height, width, 3])
-    for i, file in enumerate(images):
-        img = Image.open(file)
-        img = img.resize((width, height))
-        x = np.asarray(img, np.float32)
-        x = generator.random_transform(x)
-        x = generator.standardize(x)
-        result[i, :, :, :] = x
-    return result
-
-
-def dump_json(predictor, generator, width, height, save_path=PATH_SUBMIT, batch_size=16, top=3):
+def dump_json(predictor, save_path=PATH_SUBMIT, batch_size=16, top=3):
     print('Start dump json...')
-    if isinstance(predictor, Model):
-        predictor = Predictor(predictor)
     result = []
     images = [os.path.join(PATH_IMAGE, file) for file in os.listdir(PATH_IMAGE)]
     n_images = len(images)
@@ -40,10 +25,7 @@ def dump_json(predictor, generator, width, height, save_path=PATH_SUBMIT, batch_
     n_last_batch = n_images % batch_size
 
     def predict_batch(start, end):
-        inputs = get_batch(generator, images[start: end], width, height)
-        predictions = predictor(inputs)
-        predictions = np.argsort(predictions)
-        predictions = predictions[:, -top:][:, ::-1]
+        predictions = predictor(images[start: end])
         image_ids = [os.path.basename(image) for image in images[start: end]]
         return [{'image_id': image_ids[i], 'label_id': predictions[i, :].tolist()} for i in range(end - start)]
 
@@ -128,9 +110,9 @@ EVAL = True
 if __name__ == '__main__':
     if DUMP_JSON:
         integrated_predictor = IntegratedPredictor([
-            xt.build_model(weights_mode='acc'),
-            # xt.build_model(weights_mode='loss'),
+            KerasPredictor(xt.build_model(weights_mode='acc'), 'test'),
+            KerasPredictor(xt.build_model(weights_mode='loss'), 'val'),
         ])
-        dump_json(integrated_predictor, utils.image_generator(train=False), 299, 299)
+        dump_json(integrated_predictor)
     if EVAL:
         evaluate()

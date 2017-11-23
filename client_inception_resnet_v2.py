@@ -30,7 +30,6 @@ LEARNING_RATE = 2e-3
 
 PATH_WEIGHTS = 'params/inception_resnet_v2/{epoch:05d}-{val_loss:.4f}-{val_acc:.4f}.h5'
 PATH_SUMMARY = 'log/inception_resnet_v2'
-DUMP_JSON = False
 
 
 def build_generator(path_image, train=True):
@@ -61,7 +60,7 @@ def build_generator(path_image, train=True):
 
 def build_model(weights_mode='acc', compile=False):
     model_inception_resnet_v2 = InceptionResNetV2(include_top=False, weights='imagenet',
-                              input_shape=(IM_HEIGHT, IM_WIDTH, 3), pooling='avg')
+                                                  input_shape=(IM_HEIGHT, IM_WIDTH, 3), pooling='avg')
     for layer in model_inception_resnet_v2.layers:
         layer.trainable = False
     x = model_inception_resnet_v2.output
@@ -91,11 +90,6 @@ if __name__ == '__main__':
     val_generator = build_generator(PATH_VAL_IMAGES, train=False)
 
     model = build_model(compile=True)
-
-    if DUMP_JSON:
-        import eval
-
-        eval.dump_json(model, val_generator.image_data_generator, IM_WIDTH, IM_HEIGHT)
 
     utils.ensure_dir(os.path.dirname(PATH_WEIGHTS))
     try:

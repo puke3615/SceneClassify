@@ -3,11 +3,22 @@ import numpy as np
 import random
 
 
-def im2array(files, target_size, mode='test', grayscale=False):
+def im2array(files, target_size, mode='val', grayscale=False, preprocess=None,
+             normalization=False):
+    def handle(im):
+        im.flags.writeable = True
+        if callable(preprocess):
+            im = preprocess(im)
+        if normalization:
+            im = std_normalization(im)
+        return im
+
     if not isinstance(files, list) and not isinstance(files, tuple):
         files = [files]
-    outputs = []
+    if mode not in ['train', 'val', 'test']:
+        raise Exception('The mode named "%s" not define.' % mode)
     patch = 1
+    outputs = []
     for file in files:
         img = Image.open(file)
         if grayscale:
@@ -18,11 +29,14 @@ def im2array(files, target_size, mode='test', grayscale=False):
                 img = img.convert('RGB')
         if mode == 'train':
             img = random_crop(img, target_size)
-            outputs.append(np.asarray(img))
+            outputs.append(handle(np.asarray(img)))
+        elif mode == 'val':
+            img = center_crop(img, target_size)
+            outputs.append(handle(np.asarray(img)))
         elif mode == 'test':
             images = boundary_crop(img, target_size)
             for image in images:
-                outputs.append(np.asarray(image))
+                outputs.append(handle(np.asarray(image)))
             patch = len(images)
     outputs = np.array(outputs)
     return outputs, patch
@@ -60,9 +74,9 @@ def center_crop(img, target_size):
     size = target_size
     w, h = img.size
     if w > h:
-        return img.crop(((w - h) / 2, 0, (w + h) / 2, h)).resize([size, size])
+        return img.crop(((w - h) // 2, 0, (w + h) // 2, h)).resize([size, size])
     else:
-        return img.crop(((h - w) / 2, 0, (h + w) / 2, w)).resize([size, size])
+        return img.crop(((h - w) // 2, 0, (h + w) // 2, w)).resize([size, size])
 
 
 def random_crop(img, target_size):
@@ -79,3 +93,15 @@ def random_crop(img, target_size):
         b = t + w
     img = img.crop((l, t, r, b)).resize([size, size])
     return img
+
+
+def preprocess_input(x):
+    x = np.divide(x, 250.)
+    x -= 0.5
+    x *= 2.
+    return x
+
+
+def std_normalization(x):
+    x /= np.std(x, keepdims=True) + 1e-7
+    return x

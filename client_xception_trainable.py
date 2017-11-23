@@ -30,7 +30,6 @@ LEARNING_RATE = 2e-4
 
 PATH_WEIGHTS = 'params/xception_trainable/{epoch:05d}-{val_loss:.4f}-{val_acc:.4f}.h5'
 PATH_SUMMARY = 'log/xception_trainable'
-DUMP_JSON = False
 
 
 def build_generator(path_image, train=True):
@@ -91,11 +90,6 @@ if __name__ == '__main__':
     val_generator = build_generator(PATH_VAL_IMAGES, train=False)
 
     model = build_model(compile=True)
-
-    if DUMP_JSON:
-        import eval
-
-        eval.dump_json(model, val_generator.image_data_generator, IM_WIDTH, IM_HEIGHT)
 
     utils.ensure_dir(os.path.dirname(PATH_WEIGHTS))
     try:
