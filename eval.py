@@ -1,8 +1,11 @@
-import json
-import time
+from keras.engine.training import Model
+import client_xception_trainable as xt
 from predictor import *
 from PIL import Image
 import numpy as np
+import utils
+import json
+import time
 import os
 
 # PATH_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_validation_20170908'
@@ -26,9 +29,10 @@ def get_batch(generator, images, width, height):
     return result
 
 
-def dump_json(model, generator, width, height, save_path=PATH_SUBMIT, batch_size=16, top=3, stop=True, evaluate=True):
+def dump_json(predictor, generator, width, height, save_path=PATH_SUBMIT, batch_size=16, top=3, stop=True):
     print('Start dump json...')
-    predictor = Predictor(model)
+    if isinstance(predictor, Model):
+        predictor = Predictor(predictor)
     result = []
     images = [os.path.join(PATH_IMAGE, file) for file in os.listdir(PATH_IMAGE)]
     n_images = len(images)
@@ -61,8 +65,6 @@ def dump_json(model, generator, width, height, save_path=PATH_SUBMIT, batch_size
     with open(save_path, 'w') as f:
         json.dump(result, f)
         print('Dump finished.')
-    if evaluate:
-        main()
     if stop:
         exit(0)
 
@@ -103,7 +105,7 @@ def __eval_result(submit_dict, ref_dict, result):
     return result
 
 
-def main():
+def evaluate():
     if not os.path.exists(PATH_SUBMIT):
         raise Exception('Submit result "%s" not found. Call dump_json to dump result first.' % PATH_SUBMIT)
     result = {'error': [], 'warning': [], 'score': None}
@@ -123,5 +125,12 @@ def main():
     print('Score is %s' % result['score'])
 
 
+DUMP_JSON = True
 if __name__ == '__main__':
-    main()
+    if DUMP_JSON:
+        integrated_predictor = IntegratedPredictor([
+            xt.build_model(weights_mode='acc'),
+            # xt.build_model(weights_mode='loss'),
+        ])
+        dump_json(integrated_predictor, utils.image_generator(train=False), 299, 299)
+    evaluate()

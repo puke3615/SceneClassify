@@ -34,7 +34,7 @@ class IntegratedPredictor:
     POLICIES = ['avg', 'weight', 'label_weight']
     DEFAULT_POLICY = 'avg'
 
-    def __init__(self, models=None, policy=None):
+    def __init__(self, models=None, policy='avg'):
         self.models = models
         self.policy = policy if policy in self.POLICIES else self.DEFAULT_POLICY
         self.predictors = [Predictor(model) for model in models]

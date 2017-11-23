@@ -1,3 +1,8 @@
+from keras.applications.imagenet_utils import preprocess_input
+from keras.preprocessing.image import ImageDataGenerator
+from keras.applications.xception import preprocess_input
+import keras.backend as K
+import tensorflow as tf
 import os
 
 
@@ -52,9 +57,6 @@ def get_best_weights(path_weights, mode='acc', postfix='.h5'):
 
 
 def preprocess_image(im, width, height, train=True):
-    from keras.applications.xception import preprocess_input
-    import keras.backend as K
-    import tensorflow as tf
     size = min(im.shape[:2])
     im = tf.constant(im)
     if train:
@@ -64,3 +66,21 @@ def preprocess_image(im, width, height, train=True):
         im = tf.image.resize_image_with_crop_or_pad(im, height, width)
     im = K.get_session().run(im)
     return preprocess_input(im)
+
+
+def image_generator(train=True, preprocess=preprocess_input):
+    def wrap(value):
+        return float(train) and value
+
+    return ImageDataGenerator(
+        # samplewise_center=True,
+        # samplewise_std_normalization=True,
+        channel_shift_range=wrap(25.5),
+        rotation_range=wrap(15.),
+        width_shift_range=wrap(0.2),
+        height_shift_range=wrap(0.2),
+        shear_range=wrap(0.2),
+        zoom_range=wrap(0.2),
+        horizontal_flip=train,
+        preprocessing_function=preprocess,
+    )
