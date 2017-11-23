@@ -54,7 +54,7 @@ class IntegratedPredictor:
 
 if __name__ == '__main__':
     single_predictor = Predictor(A(8))
-    print single_predictor(np.ones([1, 2]))
+    print(single_predictor(np.ones([1, 2])))
 
     integrated_predictor = IntegratedPredictor([
         A(),
@@ -63,5 +63,5 @@ if __name__ == '__main__':
         A(4),
     ])
     prediction = integrated_predictor(x=np.zeros([1, 3, 4]))
-    print prediction
-    print prediction.shape
+    print(prediction)
+    print(prediction.shape)
