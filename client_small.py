@@ -57,16 +57,9 @@ def build_generator(path_image, path_json, train=True):
         batch_size=BATCH_SIZE,
         class_mode='categorical'
     )
-    # return DirectoryIterator(
-    #     path_image,
-    #     image_generator,
-    #     target_size=(IM_WIDTH, IM_HEIGHT),
-    #     batch_size=BATCH_SIZE,
-    #     class_mode='categorical'
-    # )
 
 
-def build_model(load_weights=True, compile=False):
+def build_model(weights_mode='acc', compile=False):
     model_vgg = keras.applications.VGG16(include_top=False, weights=None, input_shape=(IM_HEIGHT, IM_WIDTH, 3))
     model = Sequential(model_vgg.layers)
     model.add(Flatten())
@@ -79,8 +72,11 @@ def build_model(load_weights=True, compile=False):
     if compile:
         optimizer = Adam(lr=LEARNING_RATE)
         model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-    if load_weights:
-        if os.path.exists(PATH_WEIGHTS):
+    if weights_mode not in [None, 'acc', 'loss']:
+        raise Exception('Weights set error.')
+    if weights_mode:
+        weights = utils.get_best_weights(os.path.dirname(PATH_WEIGHTS), weights_mode)
+        if weights:
             model.load_weights(PATH_WEIGHTS, True)
             print('Load weights.h5 successfully.')
         else:

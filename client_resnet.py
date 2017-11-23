@@ -60,14 +60,16 @@ def build_generator(path_image, train=True):
     )
 
 
-def build_model(load_weights=True, compile=False):
+def build_model(weights_mode='acc', compile=False):
     model = ResNet50(include_top=True, weights=None,
                      input_shape=(IM_HEIGHT, IM_WIDTH, 3), classes=CLASSES)
     if compile:
         adam = Nadam(lr=LEARNING_RATE)
         model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
-    if load_weights:
-        weights = utils.get_best_weights(os.path.dirname(PATH_WEIGHTS))
+    if weights_mode not in [None, 'acc', 'loss']:
+        raise Exception('Weights set error.')
+    if weights_mode:
+        weights = utils.get_best_weights(os.path.dirname(PATH_WEIGHTS), weights_mode)
         if weights:
             model.load_weights(weights, True)
             print('Load %s successfully.' % weights)
