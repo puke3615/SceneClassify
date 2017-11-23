@@ -93,7 +93,7 @@ def random_crop(img, target_size):
 
 
 def default_preprocess_input(x):
-    return preprocess_input(x, rescale=0 / 255., center=True, normalization=True)
+    return preprocess_input(x, rescale=1 / 255., center=True, normalization=True)
 
 
 def preprocess_input(x, rescale=1 / 255., center=True, normalization=True):
