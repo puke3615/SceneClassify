@@ -1,6 +1,8 @@
 from classifier_base import BaseClassifier
 from im_utils import *
 import numpy as np
+import config
+import os
 
 
 # predictions = model.predict(inputs)
@@ -16,7 +18,7 @@ def parse_prediction(files, predictions, top=3, return_with_prob=False):
 
 
 class Predictor:
-    def __init__(self, func_predict, target_size, mode='val', preprocess=default_preprocess_input,
+    def __init__(self, func_predict, target_size, mode='val', preprocess=scene_preprocess_input,
                  top=3, return_with_prob=False):
         self.func_predict = func_predict
         self.target_size = target_size
@@ -104,7 +106,7 @@ class IntegratedPredictor(object):
 if __name__ == '__main__':
     import classifier_xception
 
-    path = 'G:/Dataset/SceneClassify/ai_challenger_scene_train_20170904/classes/00/0f39a480048e3e22640982a1c5fdde19bb5c2c47.jpg'
+    path = os.path.join(config.PATH_TRAIN_IMAGES, '00/0f39a480048e3e22640982a1c5fdde19bb5c2c47.jpg')
     model = classifier_xception.build_model()
     predictor = IntegratedPredictor([
         KerasPredictor(model, 'test'),

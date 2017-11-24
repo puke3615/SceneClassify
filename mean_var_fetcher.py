@@ -26,14 +26,15 @@ b_2 = 0  # b^2
 
 total = 0
 
-files = get_files(config.PATH_TRAIN_IMAGES)
+files = get_files(config.PATH_TRAIN_IMAGES)[:100]
 count = len(files)
 
 for i, image_file in enumerate(files):
     print('Process: %d/%d' % (i, count))
     img = Image.open(image_file)
     img = np.asarray(img)
-    img = img.astype('float32') / 255.
+    # img = img.astype('float32') / 255.
+    img = img.astype('float32')
     total += img.shape[0] * img.shape[1]
 
     r += img[:, :, 0].sum()
@@ -54,3 +55,5 @@ b_var = b_2 / total - b_mean ** 2
 
 print 'Mean is %s' % ([r_mean, g_mean, b_mean])
 print 'Var is %s' % ([r_var, g_var, b_var])
+# Mean is [0.4960301824223457, 0.47806493084428053, 0.44767167301470545]
+# Var is [0.084966025569294362, 0.082005493489533315, 0.088877477602068156]

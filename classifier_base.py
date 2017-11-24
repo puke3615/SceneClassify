@@ -43,7 +43,7 @@ class BaseClassifier(object):
             shear_range=wrap(0.2),
             zoom_range=wrap(0.2),
             horizontal_flip=train,
-            preprocessing_function=im_utils.default_preprocess_input,
+            preprocessing_function=scene_preprocess_input,
         )
 
     def data_generator(self, path_image, train=True):

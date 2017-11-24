@@ -90,6 +90,21 @@ def random_crop(img, target_size):
     return img
 
 
+def scene_preprocess_input(x):
+    # Mean is [0.4960301824223457, 0.47806493084428053, 0.44767167301470545]
+    # Var is [0.084966025569294362, 0.082005493489533315, 0.088877477602068156]
+    x *= 1 / 255.
+    # mean
+    x[:, :, :, 0] -= 0.4960301824223457
+    x[:, :, :, 1] -= 0.47806493084428053
+    x[:, :, :, 2] -= 0.44767167301470545
+    # var
+    x[:, :, :, 0] -= 0.084966025569294362
+    x[:, :, :, 1] -= 0.082005493489533315
+    x[:, :, :, 2] -= 0.088877477602068156
+    return x
+
+
 def default_preprocess_input(x):
     return preprocess_input(x, rescale=1 / 255., center=True, normalization=True)
 
