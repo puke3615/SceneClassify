@@ -1,111 +1,27 @@
-from keras.preprocessing.image import ImageDataGenerator
-from keras.applications.inception_resnet_v2 import *
-from keras.optimizers import *
-from keras.callbacks import *
-from keras.models import *
+from classifier_base import BaseClassifier
+from keras.applications import *
 from keras.layers import *
-from tensorboard import *
-
-import utils
-import os
-
-PATH_TRAIN_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_train_20170904'
-PATH_VAL_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_validation_20170908'
-
-# PATH_TRAIN_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_train_20170904'
-# PATH_VAL_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_validation_20170908'
-
-PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'classes')
-PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'classes')
-
-# PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'scene_train_images_20170904')
-# PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'scene_validation_images_20170908')
-
-IM_WIDTH = 299
-IM_HEIGHT = 299
-BATCH_SIZE = 32
-CLASSES = len(os.listdir(PATH_TRAIN_IMAGES))
-EPOCH = 100
-LEARNING_RATE = 2e-3
-
-PATH_WEIGHTS = 'params/inception_resnet_v2/{epoch:05d}-{val_loss:.4f}-{val_acc:.4f}.h5'
-PATH_SUMMARY = 'log/inception_resnet_v2'
+from keras.engine import *
+from config import *
 
 
-def build_generator(path_image, train=True):
-    def wrap(value):
-        return float(train) and value
+class InceptionRestNetV2Classifier(BaseClassifier):
+    def __init__(self, lr=2e-3, batch_size=BATCH_SIZE, weights_mode='acc', optimizer=None):
+        BaseClassifier.__init__(self, 'inception_resnet_v2', IM_SIZE_299,
+                                lr, batch_size, weights_mode, optimizer)
 
-    image_generator = ImageDataGenerator(
-        # samplewise_center=True,
-        # samplewise_std_normalization=True,
-        channel_shift_range=wrap(25.5),
-        rotation_range=wrap(15.),
-        width_shift_range=wrap(0.2),
-        height_shift_range=wrap(0.2),
-        shear_range=wrap(0.2),
-        zoom_range=wrap(0.2),
-        horizontal_flip=train,
-        preprocessing_function=preprocess_input,
-    )
-
-    return image_generator.flow_from_directory(
-        path_image,
-        classes=['%02d' % i for i in range(CLASSES)],
-        target_size=(IM_WIDTH, IM_HEIGHT),
-        batch_size=BATCH_SIZE,
-        class_mode='categorical',
-    )
-
-
-def build_model(weights_mode='acc', compile=False):
-    model_inception_resnet_v2 = InceptionResNetV2(include_top=False, weights='imagenet',
-                                                  input_shape=(IM_HEIGHT, IM_WIDTH, 3), pooling='avg')
-    for layer in model_inception_resnet_v2.layers:
-        layer.trainable = False
-    x = model_inception_resnet_v2.output
-    x = Dense(CLASSES, activation='softmax')(x)
-    model = Model(inputs=model_inception_resnet_v2.inputs, outputs=x)
-    if compile:
-        adam = Nadam(lr=LEARNING_RATE)
-        model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
-    if weights_mode not in [None, 'acc', 'loss']:
-        raise Exception('Weights set error.')
-    if weights_mode:
-        weights = utils.get_best_weights(os.path.dirname(PATH_WEIGHTS), weights_mode)
-        if weights:
-            model.load_weights(weights, True)
-            print('Load %s successfully.' % weights)
-        else:
-            print('Model params not found.')
-    return model
+    def create_model(self):
+        weights = 'imagenet' if self.context['load_imagenet_weights'] else None
+        model_inception_resnet_v2 = InceptionResNetV2(include_top=False, weights=weights,
+                                                      input_shape=(self.im_size, self.im_size, 3), pooling='avg')
+        for layer in model_inception_resnet_v2.layers:
+            layer.trainable = False
+        x = model_inception_resnet_v2.output
+        x = Dense(CLASSES, activation='softmax')(x)
+        model = Model(inputs=model_inception_resnet_v2.inputs, outputs=x)
+        return model
 
 
 if __name__ == '__main__':
-    file_num = utils.calculate_file_num(PATH_TRAIN_IMAGES)
-    steps_per_epoch = file_num // BATCH_SIZE
-    steps_validate = utils.calculate_file_num(PATH_VAL_IMAGES) // BATCH_SIZE
-    print('Steps number is %d every epoch.' % steps_per_epoch)
-    train_generator = build_generator(PATH_TRAIN_IMAGES)
-    val_generator = build_generator(PATH_VAL_IMAGES, train=False)
-
-    model = build_model(compile=True)
-
-    utils.ensure_dir(os.path.dirname(PATH_WEIGHTS))
-    try:
-        model.fit_generator(
-            train_generator,
-            steps_per_epoch=steps_per_epoch,
-            callbacks=[
-                ModelCheckpoint(PATH_WEIGHTS, verbose=1),
-                StepTensorBoard(PATH_SUMMARY, skip_steps=200)
-            ],
-            epochs=EPOCH,
-            validation_data=val_generator,
-            validation_steps=steps_validate,
-            verbose=1,
-        )
-    except KeyboardInterrupt:
-        print('\nStop by keyboardInterrupt, try saving weights.')
-        # model.save_weights(PATH_WEIGHTS)
-        print('Save weights successfully.')
+    classifier = InceptionRestNetV2Classifier(lr=2e-3)
+    classifier.train()
