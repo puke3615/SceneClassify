@@ -4,6 +4,7 @@ from keras.callbacks import *
 from keras.models import *
 from keras.layers import *
 from tensorboard import *
+from lr_monitor import *
 from generator import *
 from config import *
 
@@ -113,7 +114,8 @@ class BaseClassifier(object):
                 steps_per_epoch=steps_train,
                 callbacks=[
                     ModelCheckpoint(self.path_weights, verbose=1),
-                    StepTensorBoard(self.path_summary, skip_steps=200)
+                    StepTensorBoard(self.path_summary, skip_steps=200),
+                    LRMonitor(step=10),
                 ],
                 epochs=EPOCH,
                 validation_data=val_generator,
