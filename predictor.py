@@ -1,5 +1,6 @@
 from classifier_base import BaseClassifier
 from im_utils import *
+from config import *
 import numpy as np
 import config
 import os
@@ -67,12 +68,6 @@ class KerasPredictor(Predictor):
         Predictor.__init__(self, model.predict, w, mode,
                            preprocess, top, return_with_prob)
 
-    def _check_classifier(self, func_or_files):
-        fs = model.__class__.__dict__
-        for f in func_or_files:
-            if not fs.__contains__(f):
-                raise Exception('No function or field named "%s" found in %s.' % (f, model.__class__.__name__))
-
 
 class IntegratedPredictor(object):
     POLICIES = ['avg', 'weight', 'label_weight']
@@ -104,13 +99,17 @@ class IntegratedPredictor(object):
 
 
 if __name__ == '__main__':
-    import classifier_xception
-
     path = os.path.join(config.PATH_TRAIN_IMAGES, '00/0f39a480048e3e22640982a1c5fdde19bb5c2c47.jpg')
-    model = classifier_xception.build_model()
+    classifier = BaseClassifier('base', IM_SIZE_299)
+
+    # single predictor
+    # predictor = KerasPredictor(classifier, 'val', return_with_prob=True)
+
+    # integrated predictor
     predictor = IntegratedPredictor([
-        KerasPredictor(model, 'test'),
-        KerasPredictor(model, 'val'),
-    ], return_with_prob=False)
+        KerasPredictor(classifier, 'test'),
+        KerasPredictor(classifier, 'val'),
+    ], return_with_prob=True)
+
     prediction = predictor(path)
     print(prediction)
