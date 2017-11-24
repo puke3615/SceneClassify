@@ -59,27 +59,30 @@ class BaseClassifier(object):
     def build_model(self, weights_mode='acc'):
         if weights_mode not in [None, 'acc', 'loss']:
             raise Exception('Weights set error.')
+
+        model = self.create_model()
+
         if weights_mode:
             weights = utils.get_best_weights(os.path.dirname(self.path_weights), weights_mode)
-        else:
-            weights = None
-
-        load_imagenet_weights = self.context['load_imagenet_weights']
-        model_xception = Xception(include_top=False,
-                                  weights='imagenet' if not weights and load_imagenet_weights else None,
-                                  input_shape=(self.im_size, self.im_size, 3), pooling='avg')
-        for layer in model_xception.layers:
-            layer.trainable = False
-        x = model_xception.output
-        x = Dense(CLASSES, activation='softmax')(x)
-        model = Model(inputs=model_xception.inputs, outputs=x)
-
-        if weights:
-            model.load_weights(weights, True)
-            print('Load %s successfully.' % weights)
-        else:
-            print('Model params not found.')
+            if weights:
+                model.load_weights(weights, True)
+                print('Load %s successfully.' % weights)
+            else:
+                print('Model params not found.')
         return model
+
+    def create_model(self):
+        # load_imagenet_weights = self.context['load_imagenet_weights']
+        # model_xception = Xception(include_top=False,
+        #                           weights='imagenet' if load_imagenet_weights else None,
+        #                           input_shape=(self.im_size, self.im_size, 3), pooling='avg')
+        # for layer in model_xception.layers:
+        #     layer.trainable = False
+        # x = model_xception.output
+        # x = Dense(CLASSES, activation='softmax')(x)
+        # model = Model(inputs=model_xception.inputs, outputs=x)
+        # return model
+        raise NotImplementedError('Nothing...')
 
     def compile_mode(self, force=False):
         if not self._compiled or force:

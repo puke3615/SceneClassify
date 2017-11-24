@@ -1,4 +1,5 @@
 from classifier_base import BaseClassifier
+from classifier_xception import XceptionClassifier
 from im_utils import *
 from config import *
 import numpy as np
@@ -100,7 +101,7 @@ class IntegratedPredictor(object):
 
 if __name__ == '__main__':
     path = os.path.join(config.PATH_TRAIN_IMAGES, '00/0f39a480048e3e22640982a1c5fdde19bb5c2c47.jpg')
-    classifier = BaseClassifier('base', IM_SIZE_299)
+    classifier = XceptionClassifier()
 
     # single predictor
     # predictor = KerasPredictor(classifier, 'val', return_with_prob=True)
