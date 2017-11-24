@@ -1,6 +1,7 @@
 from keras.engine.training import Model
 import classifier_xception_trainable as xt
 from classifier_xception import XceptionClassifier
+from classifier_vgg16 import VGG16Classifier
 from predictor import *
 from PIL import Image
 import numpy as np
@@ -28,17 +29,19 @@ def dump_json(predictor, save_path=PATH_SUBMIT, batch_size=16, top=3):
     def predict_batch(start, end):
         predictions = predictor(images[start: end])
         image_ids = [os.path.basename(image) for image in images[start: end]]
-        return [{'image_id': image_ids[i], 'label_id': predictions[i, :].tolist()} for i in range(end - start)]
+        return [{'image_id': image_ids[i], 'label_id': predictions[i]} for i in range(end - start)]
 
     import sys
     for batch in range(n_batch):
         index = batch * batch_size
         sys.stdout.write('\rDumping %d/%d' % (index, n_images))
+        sys.stdout.flush()
         batch_result = predict_batch(index, index + batch_size)
         result.extend(batch_result)
     if n_last_batch:
         index = n_batch * batch_size
         sys.stdout.write('\rDumping %d/%d' % (index, n_images))
+        sys.stdout.flush()
         batch_result = predict_batch(index, index + n_last_batch)
         result.extend(batch_result)
     sys.stdout.write('\n')
@@ -111,7 +114,7 @@ EVAL = True
 if __name__ == '__main__':
     if DUMP_JSON:
         # single predictor
-        predictor = KerasPredictor(XceptionClassifier(), 'val', return_with_prob=True)
+        predictor = KerasPredictor(VGG16Classifier(), 'val')
 
         # integrated predictor
         # predictor = IntegratedPredictor([
