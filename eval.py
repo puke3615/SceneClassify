@@ -1,5 +1,6 @@
 from keras.engine.training import Model
 import classifier_xception_trainable as xt
+from classifier_xception import XceptionClassifier
 from predictor import *
 from PIL import Image
 import numpy as np
@@ -109,10 +110,15 @@ DUMP_JSON = True
 EVAL = True
 if __name__ == '__main__':
     if DUMP_JSON:
-        integrated_predictor = IntegratedPredictor([
-            KerasPredictor(xt.build_model(weights_mode='acc'), 'test'),
-            KerasPredictor(xt.build_model(weights_mode='loss'), 'val'),
-        ])
-        dump_json(integrated_predictor)
+        # single predictor
+        predictor = KerasPredictor(XceptionClassifier(), 'val', return_with_prob=True)
+
+        # integrated predictor
+        # predictor = IntegratedPredictor([
+        #     KerasPredictor(XceptionClassifier(), 'val', return_with_prob=True)
+        #     KerasPredictor(XceptionClassifier(), 'test', return_with_prob=True)
+        # ])
+
+        dump_json(predictor)
     if EVAL:
         evaluate()
