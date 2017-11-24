@@ -1,5 +1,6 @@
 from classifier_base import BaseClassifier
 from classifier_xception import XceptionClassifier
+from classifier_vgg16 import VGG16Classifier
 from im_utils import *
 from config import *
 import numpy as np
@@ -100,17 +101,16 @@ class IntegratedPredictor(object):
 
 
 if __name__ == '__main__':
-    path = os.path.join(config.PATH_TRAIN_IMAGES, '00/0f39a480048e3e22640982a1c5fdde19bb5c2c47.jpg')
-    classifier = XceptionClassifier()
+    path = os.path.join(config.PATH_TRAIN_IMAGES, '00/919aa50cc17b08fa836eb3784349da0765131ab8.jpg')
 
     # single predictor
-    # predictor = KerasPredictor(classifier, 'val', return_with_prob=True)
+    predictor = KerasPredictor(VGG16Classifier(), 'val', return_with_prob=True)
 
     # integrated predictor
-    predictor = IntegratedPredictor([
-        KerasPredictor(classifier, 'test'),
-        KerasPredictor(classifier, 'val'),
-    ], return_with_prob=True)
+    # predictor = IntegratedPredictor([
+    #     KerasPredictor(classifier, 'test'),
+    #     KerasPredictor(classifier, 'val'),
+    # ], return_with_prob=True)
 
     prediction = predictor(path)
     print(prediction)
