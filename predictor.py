@@ -81,10 +81,10 @@ class IntegratedPredictor(object):
 
 
 if __name__ == '__main__':
-    import client_xception
+    import classifier_xception
 
     path = 'G:/Dataset/SceneClassify/ai_challenger_scene_train_20170904/classes/00/0f39a480048e3e22640982a1c5fdde19bb5c2c47.jpg'
-    model = client_xception.build_model()
+    model = classifier_xception.build_model()
     predictor = IntegratedPredictor([
         KerasPredictor(model, 'test'),
         KerasPredictor(model, 'val'),

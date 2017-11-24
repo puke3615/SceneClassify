@@ -1,5 +1,5 @@
 from keras.engine.training import Model
-import client_xception_trainable as xt
+import classifier_xception_trainable as xt
 from predictor import *
 from PIL import Image
 import numpy as np
