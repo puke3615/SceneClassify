@@ -27,5 +27,5 @@ class VGG16Classifier(BaseClassifier):
 
 
 if __name__ == '__main__':
-    classifier = VGG16Classifier(lr=2e-3)
+    classifier = VGG16Classifier('vgg16_standard', lr=2e-3)
     classifier.train()
