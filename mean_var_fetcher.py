@@ -53,7 +53,7 @@ r_var = r_2 / total - r_mean ** 2
 g_var = g_2 / total - g_mean ** 2
 b_var = b_2 / total - b_mean ** 2
 
-print 'Mean is %s' % ([r_mean, g_mean, b_mean])
-print 'Var is %s' % ([r_var, g_var, b_var])
+print('Mean is %s' % ([r_mean, g_mean, b_mean]))
+print('Var is %s' % ([r_var, g_var, b_var]))
 # Mean is [0.4960301824223457, 0.47806493084428053, 0.44767167301470545]
 # Var is [0.084966025569294362, 0.082005493489533315, 0.088877477602068156]

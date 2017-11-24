@@ -46,4 +46,4 @@ EPOCH = 100
 
 if __name__ == '__main__':
     print(PATH_TRAIN_IMAGES)
-    print CONTEXT('test').values()
+    print(CONTEXT('test').values())
