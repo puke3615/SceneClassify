@@ -48,7 +48,7 @@ def boundary_crop(img, target_size):
         images.append(img.crop((0, 0, h, h)).resize([size, size]))
 
         # center
-        images.append(img.crop(((w - h) / 2, 0, (w + h) / 2, h)).resize([size, size]))
+        images.append(img.crop(((w - h) // 2, 0, (w + h) // 2, h)).resize([size, size]))
 
         # right
         images.append(img.crop((w - h, 0, w, h)).resize([size, size]))
@@ -57,7 +57,7 @@ def boundary_crop(img, target_size):
         images.append(img.crop((0, 0, w, w)).resize([size, size]))
 
         # center
-        images.append(img.crop(((h - w) / 2, 0, (h + w) / 2, w)).resize([size, size]))
+        images.append(img.crop(((h - w) // 2, 0, (h + w) // 2, w)).resize([size, size]))
 
         # bottom
         images.append(img.crop((h - w, 0, h, w)).resize([size, size]))
@@ -101,9 +101,9 @@ def scene_preprocess_input(x):
     x[:, :, 1] -= 0.47806493084428053
     x[:, :, 2] -= 0.44767167301470545
     # var
-    x[:, :, 0] -= 0.084966025569294362
-    x[:, :, 1] -= 0.082005493489533315
-    x[:, :, 2] -= 0.088877477602068156
+    x[:, :, 0] /= 0.084966025569294362
+    x[:, :, 1] /= 0.082005493489533315
+    x[:, :, 2] /= 0.088877477602068156
     return x
 
 
