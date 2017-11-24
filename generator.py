@@ -21,7 +21,7 @@ from functools import partial
 
 from keras import backend as K
 
-from keras.utils.data_utils import Sequence
+# from keras.utils.data_utils import Sequence
 
 try:
     from PIL import Image as pil_image
@@ -735,7 +735,7 @@ class ImageDataGenerator(object):
             self.principal_components = np.dot(np.dot(u, np.diag(1. / np.sqrt(s + self.zca_epsilon))), u.T)
 
 
-class Iterator(Sequence):
+class Iterator(collections.Sequence):
     """Base class for image data iterators.
 
     Every `Iterator` must implement the `_get_batches_of_transformed_samples`

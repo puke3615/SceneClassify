@@ -3,7 +3,7 @@ import numpy as np
 import random
 
 
-def im2array(files, target_size, mode=None, grayscale=False, preprocess=None):
+def im2array(files, target_size, mode=None, preprocess=None):
     def handle(im):
         im.flags.writeable = True
         if callable(preprocess):
@@ -17,12 +17,8 @@ def im2array(files, target_size, mode=None, grayscale=False, preprocess=None):
     outputs = []
     for file in files:
         img = Image.open(file)
-        if grayscale:
-            if img.mode != 'L':
-                img = img.convert('L')
-        else:
-            if img.mode != 'RGB':
-                img = img.convert('RGB')
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
         if mode == 'train':
             img = random_crop(img, target_size)
             outputs.append(handle(np.asarray(img)))
