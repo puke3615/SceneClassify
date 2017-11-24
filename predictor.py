@@ -46,8 +46,8 @@ class KerasPredictor(Predictor):
         self._check_model(model)
         h, w = model.input_shape[1:3]
         assert h == w, 'Width is not equal with height.'
-        super().__init__(model.predict, w, mode,
-                         preprocess, top, return_with_prob)
+        Predictor.__init__(self, model.predict, w, mode,
+                           preprocess, top, return_with_prob)
 
     def _check_model(self, model):
         func_predict_name = 'predict'

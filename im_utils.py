@@ -3,7 +3,7 @@ import numpy as np
 import random
 
 
-def im2array(files, target_size, mode='val', grayscale=False, preprocess=None):
+def im2array(files, target_size, mode=None, grayscale=False, preprocess=None):
     def handle(im):
         im.flags.writeable = True
         if callable(preprocess):
@@ -14,7 +14,6 @@ def im2array(files, target_size, mode='val', grayscale=False, preprocess=None):
         files = [files]
     if mode not in ['train', 'val', 'test']:
         raise Exception('The mode named "%s" not define.' % mode)
-    patch = 1
     outputs = []
     for file in files:
         img = Image.open(file)
@@ -34,7 +33,10 @@ def im2array(files, target_size, mode='val', grayscale=False, preprocess=None):
             images = boundary_crop(img, target_size)
             for image in images:
                 outputs.append(handle(np.asarray(image)))
-            patch = len(images)
+        elif mode is None:
+            img = img.resize(target_size)
+            outputs.append(handle(np.asarray(img)))
+    patch = len(outputs) // len(files)
     outputs = np.array(outputs)
     return outputs, patch
 
@@ -73,7 +75,7 @@ def center_crop(img, target_size):
     if w > h:
         return img.crop(((w - h) // 2, 0, (w + h) // 2, h)).resize([size, size])
     else:
-        return img.crop(((h - w) // 2, 0, (h + w) // 2, w)).resize([size, size])
+        return img.crop((0, (h - w) // 2, w, (h + w) // 2)).resize([size, size])
 
 
 def random_crop(img, target_size):
@@ -114,3 +116,10 @@ def std_normalization(x):
 def center_handle(x):
     x -= np.mean(x, keepdims=True)
     return x
+
+
+if __name__ == '__main__':
+    path = '/Users/zijiao/Desktop/fzq.jpeg'
+    im = Image.open(path)
+    a = center_crop(im, 299)
+    a.show()

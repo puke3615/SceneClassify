@@ -6,6 +6,7 @@ new preprocessing methods, etc...
 from __future__ import absolute_import
 from __future__ import print_function
 
+import collections
 import numpy as np
 import re
 from scipy import linalg
@@ -19,6 +20,7 @@ import multiprocessing.pool
 from functools import partial
 
 from keras import backend as K
+
 from keras.utils.data_utils import Sequence
 
 try:
@@ -40,6 +42,8 @@ if pil_image is not None:
     # This method is new in version 1.1.3 (2013).
     if hasattr(pil_image, 'LANCZOS'):
         _PIL_INTERPOLATION_METHODS['lanczos'] = pil_image.LANCZOS
+
+CROP_MODE = ['center', 'random', 'none']
 
 
 def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
@@ -320,7 +324,7 @@ def img_to_array(img, data_format=None):
 
 
 def load_img(path, grayscale=False, target_size=None,
-             interpolation='bilinear', train=True):
+             interpolation='bilinear', crop_mode='none'):
     """Loads an image into PIL format.
 
     # Arguments
@@ -363,12 +367,17 @@ def load_img(path, grayscale=False, target_size=None,
                         ", ".join(_PIL_INTERPOLATION_METHODS.keys())))
             # 此处改写Keras自带的resize逻辑，支持等比裁剪
             # img = img.resize(width_height_tuple, resample)
-            if width_height_tuple[0] != width_height_tuple[1]:
-                raise Exception('The width_height_tuple size must be equal.')
-            if train:
-                img = random_crop(img, width_height_tuple[0])
+            if crop_mode == 'none':
+                img = img.resize(width_height_tuple)
             else:
-                img = center_crop(img, width_height_tuple[0])
+                if width_height_tuple[0] != width_height_tuple[1]:
+                    raise Exception('The width_height_tuple size must be equal.')
+                if crop_mode not in CROP_MODE:
+                    raise Exception('The crop mode "%s" not support.' % crop_mode)
+                if crop_mode == 'random':
+                    img = random_crop(img, width_height_tuple[0])
+                elif crop_mode == 'center':
+                    img = center_crop(img, width_height_tuple[0])
 
     return img
 
@@ -508,7 +517,7 @@ class ImageDataGenerator(object):
                             save_prefix='',
                             save_format='png',
                             follow_links=False,
-                            train=True):
+                            crop_mode='none'):
         return DirectoryIterator(
             directory, self,
             target_size=target_size, color_mode=color_mode,
@@ -519,7 +528,7 @@ class ImageDataGenerator(object):
             save_prefix=save_prefix,
             save_format=save_format,
             follow_links=follow_links,
-            train=train)
+            crop_mode=crop_mode)
 
     def standardize(self, x):
         """Apply the normalization configuration to a batch of inputs.
@@ -1026,10 +1035,10 @@ class DirectoryIterator(Iterator):
                  batch_size=32, shuffle=True, seed=None,
                  data_format=None,
                  save_to_dir=None, save_prefix='', save_format='png',
-                 follow_links=False, train=True):
+                 follow_links=False, crop_mode='none'):
         if data_format is None:
             data_format = K.image_data_format()
-        self.train = train
+        self.crop_mode = crop_mode
         self.directory = directory
         self.image_data_generator = image_data_generator
         self.target_size = tuple(target_size)
@@ -1111,7 +1120,7 @@ class DirectoryIterator(Iterator):
             img = load_img(os.path.join(self.directory, fname),
                            grayscale=grayscale,
                            target_size=self.target_size,
-                           train=self.train)
+                           crop_mode=self.crop_mode)
             x = img_to_array(img, data_format=self.data_format)
             x = self.image_data_generator.random_transform(x)
             x = self.image_data_generator.standardize(x)
@@ -1163,14 +1172,16 @@ if __name__ == '__main__':
         samplewise_std_normalization=True,
     )
 
+    crop_mode = 'center'
     g = image_generator.flow_from_directory(
         PATH_TRAIN_IMAGES,
         target_size=(255, 255),
         batch_size=1,
         class_mode='categorical',
         save_to_dir='/Users/zijiao/Desktop/1',
-        train=False
+        save_prefix=crop_mode,
+        crop_mode=crop_mode,
     )
     for i, (x, y) in enumerate(g):
-        if i >= 10:
+        if i >= 20:
             break

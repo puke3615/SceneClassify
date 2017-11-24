@@ -54,7 +54,7 @@ def build_generator(path_image, train=True):
         target_size=(IM_WIDTH, IM_HEIGHT),
         batch_size=BATCH_SIZE,
         class_mode='categorical',
-        train=train,
+        crop_mode='random' if train else 'center',
     )
 
 
