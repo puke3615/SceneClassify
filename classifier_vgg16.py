@@ -6,8 +6,8 @@ from config import *
 
 
 class VGG16Classifier(BaseClassifier):
-    def __init__(self, lr=2e-3, batch_size=BATCH_SIZE, weights_mode='acc', optimizer=None):
-        BaseClassifier.__init__(self, 'vgg16', IM_SIZE_224,
+    def __init__(self, name='vgg16', lr=2e-3, batch_size=BATCH_SIZE, weights_mode='acc', optimizer=None):
+        BaseClassifier.__init__(self, name, IM_SIZE_224,
                                 lr, batch_size, weights_mode, optimizer)
 
     def create_model(self):
