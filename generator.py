@@ -43,7 +43,7 @@ if pil_image is not None:
     if hasattr(pil_image, 'LANCZOS'):
         _PIL_INTERPOLATION_METHODS['lanczos'] = pil_image.LANCZOS
 
-CROP_MODE = ['center', 'random', 'none']
+CROP_MODE = ['center', 'random']
 
 
 def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
@@ -324,7 +324,7 @@ def img_to_array(img, data_format=None):
 
 
 def load_img(path, grayscale=False, target_size=None,
-             interpolation='bilinear', crop_mode='none'):
+             interpolation='bilinear', crop_mode=None):
     """Loads an image into PIL format.
 
     # Arguments
@@ -367,7 +367,7 @@ def load_img(path, grayscale=False, target_size=None,
                         ", ".join(_PIL_INTERPOLATION_METHODS.keys())))
             # 此处改写Keras自带的resize逻辑，支持等比裁剪
             # img = img.resize(width_height_tuple, resample)
-            if crop_mode == 'none':
+            if crop_mode is None:
                 img = img.resize(width_height_tuple)
             else:
                 if width_height_tuple[0] != width_height_tuple[1]:
@@ -517,7 +517,7 @@ class ImageDataGenerator(object):
                             save_prefix='',
                             save_format='png',
                             follow_links=False,
-                            crop_mode='none'):
+                            crop_mode=None):
         return DirectoryIterator(
             directory, self,
             target_size=target_size, color_mode=color_mode,
@@ -1035,9 +1035,10 @@ class DirectoryIterator(Iterator):
                  batch_size=32, shuffle=True, seed=None,
                  data_format=None,
                  save_to_dir=None, save_prefix='', save_format='png',
-                 follow_links=False, crop_mode='none'):
+                 follow_links=False, crop_mode=None):
         if data_format is None:
             data_format = K.image_data_format()
+        print('The crop mode is %s.' % crop_mode)
         self.crop_mode = crop_mode
         self.directory = directory
         self.image_data_generator = image_data_generator
