@@ -1,7 +1,8 @@
 from keras.engine.training import Model
 import classifier_xception_trainable as xt
-from classifier_xception import XceptionClassifier
-from classifier_vgg16 import VGG16Classifier
+from classifier_xception import *
+from classifier_resnet import *
+from classifier_vgg16 import *
 from predictor import *
 from PIL import Image
 import numpy as np
@@ -114,7 +115,7 @@ EVAL = True
 if __name__ == '__main__':
     if DUMP_JSON:
         # single predictor
-        predictor = KerasPredictor(VGG16Classifier(), 'val')
+        predictor = KerasPredictor(RestNetClassifier(), 'val')
 
         # integrated predictor
         # predictor = IntegratedPredictor([
