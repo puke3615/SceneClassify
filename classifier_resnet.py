@@ -23,5 +23,5 @@ class RestNetClassifier(BaseClassifier):
 
 
 if __name__ == '__main__':
-    classifier = RestNetClassifier(lr=2e-3)
+    classifier = RestNetClassifier('resnet_adam', lr=2e-3, optimizer='adam')
     classifier.train()
