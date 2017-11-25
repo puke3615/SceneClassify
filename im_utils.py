@@ -13,7 +13,7 @@ def im2array(files, target_size, mode=None, preprocess=None):
 
     if not isinstance(files, list) and not isinstance(files, tuple):
         files = [files]
-    if mode not in ['train', 'val', 'test']:
+    if mode not in ['train', 'val', 'test', None]:
         raise Exception('The mode named "%s" not define.' % mode)
     outputs = []
     for file in files:
@@ -31,7 +31,7 @@ def im2array(files, target_size, mode=None, preprocess=None):
             for image in images:
                 outputs.append(handle(np.asarray(image)))
         elif mode is None:
-            img = img.resize(target_size)
+            img = img.resize((target_size, target_size))
             outputs.append(handle(np.asarray(img)))
     patch = len(outputs) // len(files)
     outputs = np.array(outputs)
@@ -108,7 +108,10 @@ def scene_preprocess_input(x):
 
 
 def default_preprocess_input(x):
-    return preprocess_input(x, rescale=1 / 255., center=True, normalization=True)
+    x = np.divide(x, 255.)
+    x -= 0.5
+    x *= 2.
+    return x
 
 
 def preprocess_input(x, rescale=1 / 255., center=True, normalization=True):

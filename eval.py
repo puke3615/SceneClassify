@@ -1,5 +1,6 @@
 from keras.engine.training import Model
 import classifier_xception_trainable as xt
+from classifier_inception_resnet_v2 import *
 from classifier_xception import *
 from classifier_resnet import *
 from classifier_vgg16 import *
@@ -35,16 +36,16 @@ def dump_json(predictor, save_path=PATH_SUBMIT, batch_size=16, top=3):
     import sys
     for batch in range(n_batch):
         index = batch * batch_size
-        sys.stdout.write('\rDumping %d/%d' % (index, n_images))
-        sys.stdout.flush()
         batch_result = predict_batch(index, index + batch_size)
         result.extend(batch_result)
+        sys.stdout.write('\rDumping %d/%d' % (index + batch_size, n_images))
+        sys.stdout.flush()
     if n_last_batch:
         index = n_batch * batch_size
-        sys.stdout.write('\rDumping %d/%d' % (index, n_images))
-        sys.stdout.flush()
         batch_result = predict_batch(index, index + n_last_batch)
         result.extend(batch_result)
+        sys.stdout.write('\rDumping %d/%d' % (index + n_last_batch, n_images))
+        sys.stdout.flush()
     sys.stdout.write('\n')
     dir = os.path.dirname(save_path)
     if not os.path.exists(dir):
@@ -112,16 +113,22 @@ def evaluate():
 
 DUMP_JSON = True
 EVAL = True
+MODE = 'test'
+WEIGHTS_MODE = 'loss'
 if __name__ == '__main__':
     if DUMP_JSON:
         # single predictor
-        predictor = KerasPredictor(RestNetClassifier('resnet_adam'), 'val')
+        # predictor = KerasPredictor(InceptionRestNetV2Classifier(), 'val')
+        # predictor = KerasPredictor(XceptionClassifier('xception_old_trainable'), None, preprocess=default_preprocess_input)
 
         # integrated predictor
-        # predictor = IntegratedPredictor([
-        #     KerasPredictor(XceptionClassifier(), 'val', return_with_prob=True)
-        #     KerasPredictor(XceptionClassifier(), 'test', return_with_prob=True)
-        # ])
+        predictor = IntegratedPredictor([
+            KerasPredictor(VGG16Classifier(weights_mode=WEIGHTS_MODE), MODE),
+            KerasPredictor(RestNetClassifier('resnet_adam', weights_mode=WEIGHTS_MODE), MODE),
+            KerasPredictor(XceptionClassifier(weights_mode=WEIGHTS_MODE), MODE),
+            KerasPredictor(XceptionClassifier('xception_old_trainable', weights_mode=WEIGHTS_MODE), None, preprocess=default_preprocess_input),
+            KerasPredictor(InceptionRestNetV2Classifier(weights_mode=WEIGHTS_MODE), MODE),
+        ])
 
         dump_json(predictor)
     if EVAL:

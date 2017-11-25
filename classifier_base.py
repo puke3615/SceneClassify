@@ -57,16 +57,16 @@ class BaseClassifier(object):
             crop_mode='random' if train else 'center',
         )
 
-    def build_model(self, weights_mode='acc'):
-        if weights_mode not in [None, 'acc', 'loss']:
+    def build_model(self):
+        if self.weights_mode not in [None, 'acc', 'loss']:
             raise Exception('Weights set error.')
 
         model = self.create_model()
 
-        if weights_mode:
-            weights = utils.get_best_weights(os.path.dirname(self.path_weights), weights_mode)
+        if self.weights_mode:
+            weights = utils.get_best_weights(os.path.dirname(self.path_weights), self.weights_mode)
             if weights:
-                model.load_weights(weights, True)
+                model.load_weights(weights)
                 print('Load %s successfully.' % weights)
             else:
                 print('Model params not found.')
