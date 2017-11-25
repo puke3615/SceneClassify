@@ -115,7 +115,7 @@ EVAL = True
 if __name__ == '__main__':
     if DUMP_JSON:
         # single predictor
-        predictor = KerasPredictor(RestNetClassifier(), 'val')
+        predictor = KerasPredictor(RestNetClassifier('resnet_adam'), 'val')
 
         # integrated predictor
         # predictor = IntegratedPredictor([
