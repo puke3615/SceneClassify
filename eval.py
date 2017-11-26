@@ -113,7 +113,7 @@ def evaluate():
 
 DUMP_JSON = True
 EVAL = True
-MODE = 'test'
+MODE = 'val'
 WEIGHTS_MODE = 'loss'
 if __name__ == '__main__':
     if DUMP_JSON:
@@ -123,10 +123,10 @@ if __name__ == '__main__':
 
         # integrated predictor
         predictor = IntegratedPredictor([
-            KerasPredictor(VGG16Classifier(weights_mode=WEIGHTS_MODE), MODE),
-            KerasPredictor(RestNetClassifier('resnet_adam', weights_mode=WEIGHTS_MODE), MODE),
-            KerasPredictor(XceptionClassifier(weights_mode=WEIGHTS_MODE), MODE),
-            KerasPredictor(XceptionClassifier('xception_old_trainable', weights_mode=WEIGHTS_MODE), None, preprocess=default_preprocess_input),
+            # KerasPredictor(VGG16Classifier(weights_mode=WEIGHTS_MODE), MODE),
+            # KerasPredictor(RestNetClassifier('resnet_adam', weights_mode=WEIGHTS_MODE), MODE),
+            # KerasPredictor(XceptionClassifier(weights_mode=WEIGHTS_MODE), MODE),
+            # KerasPredictor(XceptionClassifier('xception_old_trainable', weights_mode=WEIGHTS_MODE), None, preprocess=default_preprocess_input),
             KerasPredictor(InceptionRestNetV2Classifier(weights_mode=WEIGHTS_MODE), MODE),
         ])
 

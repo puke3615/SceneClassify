@@ -111,6 +111,7 @@ class BaseClassifier(object):
         utils.ensure_dir(os.path.dirname(self.path_weights))
         weights_info = parse_weigths(self.weights) if self.weights else None
         init_epoch = weights_info[0] if weights_info else 0
+        print('Start training from %d epoch.' % init_epoch)
         init_step = init_epoch * steps_train
         try:
             self.model.fit_generator(

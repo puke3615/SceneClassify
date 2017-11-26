@@ -17,7 +17,7 @@ def parse_weigths(weights):
             or not weights.__contains__('-'):
         return None
     try:
-        weights_info = weights.split('/')[-1].replace('.h5', '').split('-')
+        weights_info = weights.split(os.path.sep)[-1].replace('.h5', '').split('-')
         if len(weights_info) != 3:
             return None
         epoch = int(weights_info[0])
