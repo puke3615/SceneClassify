@@ -21,6 +21,7 @@ class BaseClassifier(object):
         self.lr = lr
         self.batch_size = batch_size
         self.weights_mode = weights_mode
+        self.weights = None
         self.optimizer = optimizer
 
         # parse context
@@ -64,10 +65,10 @@ class BaseClassifier(object):
         model = self.create_model()
 
         if self.weights_mode:
-            weights = utils.get_best_weights(os.path.dirname(self.path_weights), self.weights_mode)
-            if weights:
-                model.load_weights(weights)
-                print('Load %s successfully.' % weights)
+            self.weights = utils.get_best_weights(os.path.dirname(self.path_weights), self.weights_mode)
+            if self.weights:
+                model.load_weights(self.weights)
+                print('Load %s successfully.' % self.weights)
             else:
                 print('Model params not found.')
         return model
@@ -108,13 +109,15 @@ class BaseClassifier(object):
 
         # start training
         utils.ensure_dir(os.path.dirname(self.path_weights))
+        weights_info = parse_weigths(self.weights) if self.weights else None
+        init_step = weights_info[0] * steps_train if weights_info else 0
         try:
             self.model.fit_generator(
                 train_generator,
                 steps_per_epoch=steps_train,
                 callbacks=[
                     ModelCheckpoint(self.path_weights, verbose=1),
-                    StepTensorBoard(self.path_summary, skip_steps=200),
+                    StepTensorBoard(self.path_summary, init_steps=init_step, skip_steps=200),
                     LRMonitor(step=10),
                 ],
                 epochs=EPOCH,

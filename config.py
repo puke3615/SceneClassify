@@ -10,6 +10,23 @@ def is_windows():
     return os_name.startswith('windows')
 
 
+def parse_weigths(weights):
+    if not weights \
+            or not weights.endswith('.h5') \
+            or not weights.__contains__('/') \
+            or not weights.__contains__('-'):
+        return None
+    try:
+        weights_info = weights.split('/')[-1].replace('.h5', '').split('-')
+        if len(weights_info) != 3:
+            return None
+        epoch = int(weights_info[0])
+        val_loss = float(weights_info[1])
+        val_acc = float(weights_info[2])
+        return epoch, val_loss, val_acc
+    except Exception as e:
+        raise Exception('Parse weights failure: %s', str(e))
+
 def CONTEXT(name, **kwargs):
     return {
         'weights': 'params/%s/{epoch:05d}-{val_loss:.4f}-{val_acc:.4f}.h5' % name,
