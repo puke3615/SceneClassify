@@ -110,7 +110,8 @@ class BaseClassifier(object):
         # start training
         utils.ensure_dir(os.path.dirname(self.path_weights))
         weights_info = parse_weigths(self.weights) if self.weights else None
-        init_step = weights_info[0] * steps_train if weights_info else 0
+        init_epoch = weights_info[0] if weights_info else 0
+        init_step = init_epoch * steps_train
         try:
             self.model.fit_generator(
                 train_generator,
@@ -120,6 +121,7 @@ class BaseClassifier(object):
                     StepTensorBoard(self.path_summary, init_steps=init_step, skip_steps=200),
                     LRMonitor(step=10),
                 ],
+                initial_epoch=init_epoch,
                 epochs=EPOCH,
                 validation_data=val_generator,
                 validation_steps=steps_val,
