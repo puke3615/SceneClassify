@@ -6,6 +6,19 @@ import tensorflow as tf
 import os
 
 
+def get_files(dir):
+    import os
+    if not os.path.exists(dir):
+        return []
+    if os.path.isfile(dir):
+        return [dir]
+    result = []
+    for subdir in os.listdir(dir):
+        sub_path = os.path.join(dir, subdir)
+        result += get_files(sub_path)
+    return result
+
+
 def calculate_file_num(dir):
     if not os.path.exists(dir):
         return 0

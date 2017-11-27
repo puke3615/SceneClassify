@@ -26,7 +26,7 @@ b_2 = 0  # b^2
 
 total = 0
 
-files = get_files(config.PATH_TRAIN_IMAGES)[:100]
+files = get_files(config.PATH_TRAIN_IMAGES)
 count = len(files)
 
 for i, image_file in enumerate(files):

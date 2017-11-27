@@ -6,24 +6,18 @@ from classifier_resnet import *
 from classifier_vgg16 import *
 from predictor import *
 from PIL import Image
+from config import *
 import numpy as np
 import utils
 import json
 import time
 import os
 
-# PATH_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_validation_20170908'
-PATH_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_validation_20170908'
 
-PATH_IMAGE = os.path.join(PATH_BASE, 'scene_validation_images_20170908')
-PATH_REF = os.path.join(PATH_BASE, 'scene_validation_annotations_20170908.json')
-PATH_SUBMIT = 'eval_json/resnet.json'
-
-
-def dump_json(predictor, save_path=PATH_SUBMIT, batch_size=16, top=3):
+def dump_json(predictor, save_path=PATH_JSON_DUMP, target_dir=PATH_VAL_IMAGES, batch_size=16):
     print('Start dump json...')
     result = []
-    images = [os.path.join(PATH_IMAGE, file) for file in os.listdir(PATH_IMAGE)]
+    images = utils.get_files(target_dir)
     n_images = len(images)
     n_batch = n_images // batch_size
     n_last_batch = n_images % batch_size
@@ -91,15 +85,15 @@ def __eval_result(submit_dict, ref_dict, result):
     return result
 
 
-def evaluate():
-    if not os.path.exists(PATH_SUBMIT):
-        raise Exception('Submit result "%s" not found. Call dump_json to dump result first.' % PATH_SUBMIT)
+def evaluate(eval_json, target_json):
+    if not os.path.exists(eval_json):
+        raise Exception('Submit result "%s" not found. Call dump_json to dump result first.' % PATH_JSON_DUMP)
     result = {'error': [], 'warning': [], 'score': None}
     START_TIME = time.time()
     SUBMIT = {}
     REF = {}
     try:
-        SUBMIT, REF = __load_data(PATH_SUBMIT, PATH_REF, result)
+        SUBMIT, REF = __load_data(eval_json, target_json, result)
     except Exception as error:
         result['error'].append(str(error))
     try:
@@ -125,11 +119,11 @@ if __name__ == '__main__':
         predictor = IntegratedPredictor([
             # KerasPredictor(VGG16Classifier(weights_mode=WEIGHTS_MODE), MODE),
             # KerasPredictor(RestNetClassifier('resnet_adam', weights_mode=WEIGHTS_MODE), MODE),
-            # KerasPredictor(XceptionClassifier(weights_mode=WEIGHTS_MODE), MODE),
+            KerasPredictor(XceptionClassifier(weights_mode=WEIGHTS_MODE), MODE),
             # KerasPredictor(XceptionClassifier('xception_old_trainable', weights_mode=WEIGHTS_MODE), None, preprocess=default_preprocess_input),
-            KerasPredictor(InceptionRestNetV2Classifier(weights_mode=WEIGHTS_MODE), MODE),
+            # KerasPredictor(InceptionRestNetV2Classifier(weights_mode=WEIGHTS_MODE), MODE),
         ])
 
         dump_json(predictor)
     if EVAL:
-        evaluate()
+        evaluate(PATH_JSON_DUMP, PATH_VAL_JSON)
