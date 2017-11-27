@@ -23,6 +23,7 @@ class XceptionClassifier(BaseClassifier):
 
 
 if __name__ == '__main__':
-    # classifier = XceptionClassifier(lr=2e-3)
-    classifier = XceptionClassifier(lr=2e-4)
+    classifier = XceptionClassifier('xception_clip', lr=2e-3)
+    # classifier = XceptionClassifier(lr=2e-4)
+    # classifier = XceptionClassifier(lr=2e-5)
     classifier.train()

@@ -10,7 +10,7 @@ PATH_BASE_DIR = config.PATH_TRAIN_BASE
 # PATH_BASE_DIR = config.PATH_VAL_BASE
 
 # 保存文件路径
-PATH_SAVE_DIR = os.path.join(PATH_BASE_DIR, 'classes')
+PATH_SAVE_DIR = os.path.join(PATH_BASE_DIR, 'classes_clip')
 # 是否按照分类名保存
 SUB_DIR_WITH_NAME = False
 
@@ -21,7 +21,7 @@ PATH_JSON = os.path.join(PATH_BASE_DIR, 'scene_train_annotations_20170904.json')
 # PATH_JSON = os.path.join(PATH_BASE_DIR, 'scene_validation_annotations_20170908.json')
 PATH_CSV = os.path.join(PATH_BASE_DIR, 'scene_classes.csv')
 PRINT = True
-MEAN_HANDLE = False
+MEAN_HANDLE = True
 
 
 def output(obj):
@@ -34,7 +34,7 @@ def output(obj):
 
 
 def parse_labels():
-    with open(PATH_CSV) as f:
+    with open(PATH_CSV, encoding='utf-8') as f:
         return [line[1] for line in csv.reader(f)]
 
 
@@ -69,17 +69,18 @@ if __name__ == '__main__':
                 images = np.random.choice(images, target_files_size, replace=False).tolist()
             elif len(images) < target_files_size:
                 # 少了添加
-                offset = target_files_size - len(images)
-                while len(images) < target_files_size:
+                added = []
+                while len(images) + len(added) < target_files_size:
+                    offset = target_files_size - len(images) - len(added)
                     if offset >= len(images):
-                        images *= 2
+                        added.extend(images)
                     else:
-                        added_num = min(offset, len(images))
-                        images.extend(np.random.choice(images, added_num, replace=False).tolist())
+                        images.extend(np.random.choice(images, offset, replace=False).tolist())
+                images.extend(added)
         for image in images:
             with open(os.path.join(PATH_IMAGES, image), 'rb') as old:
                 target_file = os.path.join(sub_dir, image)
-                if os.path.exists(target_file):
+                while os.path.exists(target_file):
                     target_file = target_file.replace('.', '_.')
                 with open(target_file, 'wb') as new:
                     new.write(old.read())
