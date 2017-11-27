@@ -1,14 +1,14 @@
 # coding=utf-8
+import numpy as np
+import config
 import json
 import csv
 import os
 
 # 源文件路径
-PATH_BASE_DIR = '/Users/zijiao/Desktop/ai_challenger_scene_train_20170904'
-# PATH_BASE_DIR = '/Users/zijiao/Desktop/ai_challenger_scene_validation_20170908'
+PATH_BASE_DIR = config.PATH_TRAIN_BASE
+# PATH_BASE_DIR = config.PATH_VAL_BASE
 
-# PATH_BASE_DIR = 'G:/Dataset/SceneClassify/ai_challenger_scene_train_20170904'
-# PATH_BASE_DIR = 'G:/Dataset/SceneClassify/ai_challenger_scene_validation_20170908'
 # 保存文件路径
 PATH_SAVE_DIR = os.path.join(PATH_BASE_DIR, 'classes')
 # 是否按照分类名保存
@@ -21,6 +21,7 @@ PATH_JSON = os.path.join(PATH_BASE_DIR, 'scene_train_annotations_20170904.json')
 # PATH_JSON = os.path.join(PATH_BASE_DIR, 'scene_validation_annotations_20170908.json')
 PATH_CSV = os.path.join(PATH_BASE_DIR, 'scene_classes.csv')
 PRINT = True
+MEAN_HANDLE = False
 
 
 def output(obj):
@@ -61,9 +62,26 @@ if __name__ == '__main__':
         sub_dir = os.path.join(PATH_SAVE_DIR, label_format)
         if not os.path.exists(sub_dir):
             os.makedirs(sub_dir)
+        if MEAN_HANDLE:
+            target_files_size = len(image2label) // len(label2image)
+            if len(images) > target_files_size:
+                # 多了抽取
+                images = np.random.choice(images, target_files_size, replace=False).tolist()
+            elif len(images) < target_files_size:
+                # 少了添加
+                offset = target_files_size - len(images)
+                while len(images) < target_files_size:
+                    if offset >= len(images):
+                        images *= 2
+                    else:
+                        added_num = min(offset, len(images))
+                        images.extend(np.random.choice(images, added_num, replace=False).tolist())
         for image in images:
             with open(os.path.join(PATH_IMAGES, image), 'rb') as old:
-                with open(os.path.join(sub_dir, image), 'wb') as new:
+                target_file = os.path.join(sub_dir, image)
+                if os.path.exists(target_file):
+                    target_file = target_file.replace('.', '_.')
+                with open(target_file, 'wb') as new:
                     new.write(old.read())
                     output('Write finish % s' % image)
     output('Completed.')

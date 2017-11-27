@@ -32,9 +32,9 @@ count = len(files)
 for i, image_file in enumerate(files):
     print('Process: %d/%d' % (i, count))
     img = Image.open(image_file)
+    # img = img.resize((299, 299))
     img = np.asarray(img)
-    # img = img.astype('float32') / 255.
-    img = img.astype('float32')
+    img = img.astype('float32') / 255.
     total += img.shape[0] * img.shape[1]
 
     r += img[:, :, 0].sum()
