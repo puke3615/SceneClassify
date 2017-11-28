@@ -23,7 +23,7 @@ class XceptionClassifier(BaseClassifier):
         return model
 
     def data_generator(self, path_image, train=True):
-        generator = BaseClassifier.data_generator(path_image, train)
+        generator = BaseClassifier.data_generator(self, path_image, train)
         generator.crop_mode = None
         return generator
 
