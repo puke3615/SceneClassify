@@ -8,6 +8,9 @@ def image_generator(train=True):
         return float(train) and value
 
     return ImageDataGenerator(
+        contrast_stretching=True,  #####
+        histogram_equalization=False,  #####
+        adaptive_equalization=False,  #####
         channel_shift_range=wrap(25.5),
         rotation_range=wrap(15.),
         width_shift_range=wrap(0.2),
@@ -32,7 +35,7 @@ def data_generator(path_image, train=True):
     )
 
 
-generator = data_generator(PATH_TRAIN_IMAGES, train=True)
+generator = data_generator(PATH_TRAIN_IMAGES, train=False)
 for i, (x, y) in enumerate(generator):
     if i >= 1:
         break

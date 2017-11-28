@@ -20,6 +20,8 @@ import multiprocessing.pool
 from functools import partial
 
 from keras import backend as K
+from skimage import data, img_as_float
+from skimage import exposure
 
 # from keras.utils.data_utils import Sequence
 
@@ -430,6 +432,9 @@ class ImageDataGenerator(object):
     """
 
     def __init__(self,
+                 contrast_stretching=False, #####
+                 histogram_equalization=False,#####
+                 adaptive_equalization=False, #####
                  featurewise_center=False,
                  samplewise_center=False,
                  featurewise_std_normalization=False,
@@ -451,6 +456,9 @@ class ImageDataGenerator(object):
                  data_format=None):
         if data_format is None:
             data_format = K.image_data_format()
+        self.contrast_stretching = contrast_stretching #####
+        self.adaptive_equalization = adaptive_equalization #####
+        self.histogram_equalization = histogram_equalization #####
         self.featurewise_center = featurewise_center
         self.samplewise_center = samplewise_center
         self.featurewise_std_normalization = featurewise_std_normalization
@@ -663,6 +671,19 @@ class ImageDataGenerator(object):
         if self.vertical_flip:
             if np.random.random() < 0.5:
                 x = flip_axis(x, img_row_axis)
+
+        if self.contrast_stretching: #####
+            if np.random.random() < 0.5: #####
+                p2, p98 = np.percentile(x, (2, 98)) #####
+                x = exposure.rescale_intensity(x, in_range=(p2, p98)) #####
+
+        if self.adaptive_equalization: #####
+            if np.random.random() < 0.5: #####
+                x = exposure.equalize_adapthist(x, clip_limit=0.03) #####
+
+        if self.histogram_equalization: #####
+            if np.random.random() < 0.5: #####
+                x = exposure.equalize_hist(x) #####
 
         return x
 
