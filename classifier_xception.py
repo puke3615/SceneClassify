@@ -22,6 +22,11 @@ class XceptionClassifier(BaseClassifier):
         model = Model(inputs=model_xception.inputs, outputs=x)
         return model
 
+    def image_generator(self, train=True):
+        generator = super(XceptionClassifier, self).image_generator(train)
+        generator.contrast_stretching = train
+        return generator
+
     def data_generator(self, path_image, train=True):
         generator = BaseClassifier.data_generator(self, path_image, train)
         generator.crop_mode = None
