@@ -1,3 +1,4 @@
+import utils
 from classifier_base import BaseClassifier
 from keras.applications import *
 from keras.optimizers import *
@@ -38,4 +39,4 @@ if __name__ == '__main__':
     # classifier = XceptionClassifier(lr=2e-4)
     # classifier = XceptionClassifier(lr=2e-5)
     classifier = XceptionClassifier('xception_resize', optimizer=Adam(1e-4))
-    classifier.train()
+    classifier.train(class_weight=utils.calculate_class_weight())

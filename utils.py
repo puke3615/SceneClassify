@@ -3,6 +3,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.applications.xception import preprocess_input
 import keras.backend as K
 import tensorflow as tf
+import config
 import os
 
 
@@ -34,6 +35,15 @@ def calculate_file_num(dir):
 def ensure_dir(dir):
     if not os.path.exists(dir):
         os.makedirs(dir)
+
+
+def calculate_class_weight(train_path=config.PATH_TRAIN_IMAGES):
+    if not os.path.isdir(train_path):
+        raise Exception('Dir "%s" not exists.' % train_path)
+    n_classes = [len(os.listdir(os.path.join(train_path, subdir))) for subdir in os.listdir(train_path)]
+    print n_classes
+    n_all = sum(n_classes)
+    return [num / float(n_all) for num in n_classes]
 
 
 def get_best_weights(path_weights, mode='acc', postfix='.h5'):
