@@ -41,7 +41,6 @@ def calculate_class_weight(train_path=config.PATH_TRAIN_IMAGES):
     if not os.path.isdir(train_path):
         raise Exception('Dir "%s" not exists.' % train_path)
     n_classes = [len(os.listdir(os.path.join(train_path, subdir))) for subdir in os.listdir(train_path)]
-    print n_classes
     n_all = sum(n_classes)
     return [num / float(n_all) for num in n_classes]
 

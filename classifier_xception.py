@@ -4,6 +4,7 @@ from keras.applications import *
 from keras.optimizers import *
 from keras.layers import *
 from keras.engine import *
+from generator import *
 from config import *
 
 
@@ -24,9 +25,20 @@ class XceptionClassifier(BaseClassifier):
         return model
 
     def image_generator(self, train=True):
-        generator = super(XceptionClassifier, self).image_generator(train)
-        generator.contrast_stretching = train
-        return generator
+        def wrap(value):
+            return float(train) and value
+
+        return ImageDataGenerator(
+            contrast_stretching=train,
+            channel_shift_range=wrap(25.5),
+            # rotation_range=wrap(15.),
+            # width_shift_range=wrap(0.2),
+            # height_shift_range=wrap(0.2),
+            # shear_range=wrap(0.2),
+            # zoom_range=wrap(0.2),
+            horizontal_flip=train,
+            preprocessing_function=scene_preprocess_input,
+        )
 
     def data_generator(self, path_image, train=True):
         generator = BaseClassifier.data_generator(self, path_image, train)
@@ -38,5 +50,5 @@ if __name__ == '__main__':
     # classifier = XceptionClassifier(lr=2e-3)
     # classifier = XceptionClassifier(lr=2e-4)
     # classifier = XceptionClassifier(lr=2e-5)
-    classifier = XceptionClassifier('xception_resize', optimizer=Adam(1e-4))
+    classifier = XceptionClassifier('xception_resize', weights_mode='loss', optimizer=Adam(1e-4))
     classifier.train(class_weight=utils.calculate_class_weight())
