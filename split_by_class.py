@@ -10,7 +10,7 @@ PATH_BASE_DIR = config.PATH_TRAIN_BASE
 # PATH_BASE_DIR = config.PATH_VAL_BASE
 
 # 保存文件路径
-PATH_SAVE_DIR = os.path.join(PATH_BASE_DIR, 'classes_clip')
+PATH_SAVE_DIR = os.path.join(PATH_BASE_DIR, 'classes')
 # 是否按照分类名保存
 SUB_DIR_WITH_NAME = False
 
@@ -21,7 +21,8 @@ PATH_JSON = os.path.join(PATH_BASE_DIR, 'scene_train_annotations_20170904.json')
 # PATH_JSON = os.path.join(PATH_BASE_DIR, 'scene_validation_annotations_20170908.json')
 PATH_CSV = os.path.join(PATH_BASE_DIR, 'scene_classes.csv')
 PRINT = True
-MEAN_HANDLE = True
+# 均值处理类不均衡问题
+MEAN_HANDLE = False
 
 
 def output(obj):

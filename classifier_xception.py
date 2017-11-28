@@ -1,5 +1,6 @@
 from classifier_base import BaseClassifier
 from keras.applications import *
+from keras.optimizers import *
 from keras.layers import *
 from keras.engine import *
 from config import *
@@ -21,9 +22,15 @@ class XceptionClassifier(BaseClassifier):
         model = Model(inputs=model_xception.inputs, outputs=x)
         return model
 
+    def data_generator(self, path_image, train=True):
+        generator = BaseClassifier.data_generator(path_image, train)
+        generator.crop_mode = None
+        return generator
+
 
 if __name__ == '__main__':
-    classifier = XceptionClassifier('xception_clip', lr=2e-3)
+    # classifier = XceptionClassifier(lr=2e-3)
     # classifier = XceptionClassifier(lr=2e-4)
     # classifier = XceptionClassifier(lr=2e-5)
+    classifier = XceptionClassifier('xception_resize', optimizer=Adam())
     classifier.train()

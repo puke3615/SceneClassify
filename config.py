@@ -57,8 +57,7 @@ elif is_linux():
 else:
     raise Exception('No images configured on %s' % os_name)
 
-PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'classes_clip' if is_windows() else 'classes')
-# PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'classes')
+PATH_TRAIN_IMAGES = os.path.join(PATH_TRAIN_BASE, 'classes')
 PATH_TRAIN_JSON = os.path.join(PATH_TRAIN_BASE, 'scene_train_annotations_20170904.json')
 
 PATH_VAL_IMAGES = os.path.join(PATH_VAL_BASE, 'classes')
