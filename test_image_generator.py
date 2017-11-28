@@ -39,8 +39,7 @@ generator = data_generator(PATH_TRAIN_IMAGES, train=False)
 for i, (x, y) in enumerate(generator):
     if i >= 1:
         break
-<<<<<<< HEAD
-    print len(y)
+    print(len(y))
 
 # from PIL import Image
 # from skimage import exposure
@@ -61,6 +60,3 @@ for i, (x, y) in enumerate(generator):
 #
 # im = Image.fromarray(im.astype(np.uint8))
 # im.show()
-=======
-    print(len(y))
->>>>>>> reduce adam lr for xception classifier
