@@ -40,3 +40,23 @@ for i, (x, y) in enumerate(generator):
     if i >= 1:
         break
     print len(y)
+
+# from PIL import Image
+# from skimage import exposure
+# import numpy as np
+# path = os.path.join(PATH_TRAIN_IMAGES, '00/0d8575935a771b6a64aa0bf769ae87453beefcbf.jpg')
+# im = Image.open(path)
+# # im.show()
+#
+# im = np.array(im)
+# p2, p98 = np.percentile(im, (2, 98)) #####
+# # im = exposure.rescale_intensity(im, in_range=(p2, p98)) #####
+#
+# # im = exposure.equalize_adapthist(im, clip_limit=0.03) #####
+# # im *= 255
+#
+# # im = exposure.equalize_hist(im).astype(np.uint8) #####
+# # im *= 255
+#
+# im = Image.fromarray(im.astype(np.uint8))
+# im.show()

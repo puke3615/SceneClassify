@@ -675,16 +675,21 @@ class ImageDataGenerator(object):
         if self.contrast_stretching: #####
             if np.random.random() < 0.5: #####
                 p2, p98 = np.percentile(x, (2, 98)) #####
-                x = exposure.rescale_intensity(x, in_range=(p2, p98)) #####
+                x = exposure.rescale_intensity(x.astype(np.uint8), in_range=(p2, p98)) #####
 
         if self.adaptive_equalization: #####
             if np.random.random() < 0.5: #####
+                x = exposure.equalize_adapthist(x.astype(np.uint8), clip_limit=0.03) #####
                 x = exposure.equalize_adapthist(x, clip_limit=0.03) #####
+                x *= 255
 
         if self.histogram_equalization: #####
             if np.random.random() < 0.5: #####
-                x = exposure.equalize_hist(x) #####
+                x = exposure.equalize_hist(x).astype(np.uint8) #####
+                x *= 255
 
+        if x.dtype == np.uint8:
+            x = x.astype(np.float32)
         return x
 
     def fit(self, x,
