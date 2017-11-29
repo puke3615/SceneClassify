@@ -1,6 +1,6 @@
 from generator import ImageDataGenerator
+from im_utils import *
 from config import *
-import im_utils
 
 
 def image_generator(train=True):
@@ -8,17 +8,18 @@ def image_generator(train=True):
         return float(train) and value
 
     return ImageDataGenerator(
-        contrast_stretching=True,  #####
-        histogram_equalization=False,  #####
-        adaptive_equalization=False,  #####
-        channel_shift_range=wrap(25.5),
-        rotation_range=wrap(15.),
-        width_shift_range=wrap(0.2),
-        height_shift_range=wrap(0.2),
-        shear_range=wrap(0.2),
-        zoom_range=wrap(0.2),
-        horizontal_flip=train,
-        preprocessing_function=im_utils.scene_preprocess_input,
+        # contrast_stretching=True,  #####
+        # histogram_equalization=False,  #####
+        # adaptive_equalization=False,  #####
+        # channel_shift_range=wrap(25.5),
+        # rotation_range=wrap(15.),
+        # width_shift_range=wrap(0.2),
+        # height_shift_range=wrap(0.2),
+        # shear_range=wrap(0.2),
+        # zoom_range=wrap(0.2),
+        # horizontal_flip=train,
+        # preprocessing_function=im_utils.scene_preprocess_input,
+        preprocessing_function=lambda x: scene_preprocess_input(aug_images([x])[0] if train else x)
     )
 
 
@@ -35,7 +36,7 @@ def data_generator(path_image, train=True):
     )
 
 
-generator = data_generator(PATH_TRAIN_IMAGES, train=False)
+generator = data_generator(PATH_TRAIN_IMAGES, train=True)
 for i, (x, y) in enumerate(generator):
     if i >= 1:
         break
