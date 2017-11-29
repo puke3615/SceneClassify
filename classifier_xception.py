@@ -17,7 +17,7 @@ class XceptionClassifier(BaseClassifier):
         weights = 'imagenet' if self.context['load_imagenet_weights'] else None
         model_xception = Xception(include_top=False, weights=weights,
                                   input_shape=(self.im_size, self.im_size, 3), pooling='avg')
-        for layer in model_xception.layers:
+        for layer in model_xception.layers[:-5]:
             layer.trainable = False
         x = model_xception.output
         x = Dense(CLASSES, activation='softmax')(x)
@@ -31,11 +31,11 @@ class XceptionClassifier(BaseClassifier):
         return ImageDataGenerator(
             contrast_stretching=train,
             channel_shift_range=wrap(25.5),
-            # rotation_range=wrap(15.),
-            # width_shift_range=wrap(0.2),
-            # height_shift_range=wrap(0.2),
-            # shear_range=wrap(0.2),
-            # zoom_range=wrap(0.2),
+            rotation_range=wrap(6.),
+            width_shift_range=wrap(0.05),
+            height_shift_range=wrap(0.05),
+            shear_range=wrap(0.05),
+            zoom_range=wrap(0.05),
             horizontal_flip=train,
             preprocessing_function=scene_preprocess_input,
         )
