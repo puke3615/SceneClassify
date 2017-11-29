@@ -30,6 +30,6 @@ if __name__ == '__main__':
     classifier = XceptionTrainableClassifier(
         name='xception_aug',
         weights_mode='loss',
-        optimizer=Adam(1e-2)
+        optimizer=Adam(1e-3)
     )
     classifier.train(class_weight=calculate_class_weight())
