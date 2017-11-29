@@ -33,29 +33,14 @@ class BaseClassifier(object):
         self.model = self.build_model()
         self._compiled = False
 
-    def image_generator(self, train=True):
-        def wrap(value):
-            return float(train) and value
-
-        return ImageDataGenerator(
-            channel_shift_range=wrap(25.5),
-            rotation_range=wrap(15.),
-            width_shift_range=wrap(0.2),
-            height_shift_range=wrap(0.2),
-            shear_range=wrap(0.2),
-            zoom_range=wrap(0.2),
-            horizontal_flip=train,
-            preprocessing_function=scene_preprocess_input,
-        )
-
     def data_generator(self, path_image, train=True):
-        return self.image_generator(train).flow_from_directory(
-            path_image,
+        return DirectoryIterator(
+            path_image, None,
             classes=['%02d' % i for i in range(CLASSES)],
             target_size=(self.im_size, self.im_size),
             batch_size=self.batch_size,
             class_mode='categorical',
-            crop_mode='random' if train else 'center',
+            batch_handler=lambda x: func_batch_handle(x, train)
         )
 
     def build_model(self):

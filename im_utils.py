@@ -6,6 +6,13 @@ import numpy as np
 import random
 
 
+def func_batch_handle(batch_x, train=True):
+    if train:
+        batch_x = aug_images(batch_x)
+    batch_x = scene_preprocess_input(batch_x)
+    return batch_x
+
+
 def aug_images(images_data):
     # Sometimes(0.5, ...) applies the given augmenter in 50% of all cases,
     # e.g. Sometimes(0.5, GaussianBlur(0.3)) would blur roughly every second

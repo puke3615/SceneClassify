@@ -24,27 +24,6 @@ class XceptionClassifier(BaseClassifier):
         model = Model(inputs=model_xception.inputs, outputs=x)
         return model
 
-    def image_generator(self, train=True):
-        def wrap(value):
-            return float(train) and value
-
-        return ImageDataGenerator(
-            contrast_stretching=train,
-            channel_shift_range=wrap(25.5),
-            rotation_range=wrap(6.),
-            width_shift_range=wrap(0.05),
-            height_shift_range=wrap(0.05),
-            shear_range=wrap(0.05),
-            zoom_range=wrap(0.05),
-            horizontal_flip=train,
-            preprocessing_function=scene_preprocess_input,
-        )
-
-    def data_generator(self, path_image, train=True):
-        generator = BaseClassifier.data_generator(self, path_image, train)
-        generator.crop_mode = None
-        return generator
-
 
 if __name__ == '__main__':
     # classifier = XceptionClassifier(lr=2e-3)
