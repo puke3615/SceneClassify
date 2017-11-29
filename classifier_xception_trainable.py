@@ -9,6 +9,13 @@ from utils import *
 import generator
 
 
+def func_batch_handle(batch_x, train=True):
+    if train:
+        batch_x = aug_images(batch_x)
+    batch_x = scene_preprocess_input(batch_x)
+    return batch_x
+
+
 class XceptionTrainableClassifier(BaseClassifier):
     def __init__(self, name='xception_trainable', lr=2e-3, batch_size=BATCH_SIZE, weights_mode='acc', optimizer=None):
         BaseClassifier.__init__(self, name, IM_SIZE_299,
@@ -36,6 +43,8 @@ class XceptionTrainableClassifier(BaseClassifier):
     def data_generator(self, path_image, train=True):
         generator = BaseClassifier.data_generator(self, path_image, train)
         generator.crop_mode = None
+        generator.image_data_generator = None
+        generator.batch_handler = lambda x: func_batch_handle(x, train)
         return generator
 
 

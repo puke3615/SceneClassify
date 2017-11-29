@@ -525,7 +525,8 @@ class ImageDataGenerator(object):
                             save_prefix='',
                             save_format='png',
                             follow_links=False,
-                            crop_mode=None):
+                            crop_mode=None,
+                            batch_handler=None):
         return DirectoryIterator(
             directory, self,
             target_size=target_size, color_mode=color_mode,
@@ -536,7 +537,9 @@ class ImageDataGenerator(object):
             save_prefix=save_prefix,
             save_format=save_format,
             follow_links=follow_links,
-            crop_mode=crop_mode)
+            crop_mode=crop_mode,
+            batch_handler=batch_handler
+        )
 
     def standardize(self, x):
         """Apply the normalization configuration to a batch of inputs.
@@ -1061,11 +1064,12 @@ class DirectoryIterator(Iterator):
                  batch_size=32, shuffle=True, seed=None,
                  data_format=None,
                  save_to_dir=None, save_prefix='', save_format='png',
-                 follow_links=False, crop_mode=None):
+                 follow_links=False, crop_mode=None, batch_handler=None):
         if data_format is None:
             data_format = K.image_data_format()
         print('The crop mode is %s.' % crop_mode)
         self.crop_mode = crop_mode
+        self.batch_handler = batch_handler
         self.directory = directory
         self.image_data_generator = image_data_generator
         self.target_size = tuple(target_size)
@@ -1149,9 +1153,12 @@ class DirectoryIterator(Iterator):
                            target_size=self.target_size,
                            crop_mode=self.crop_mode)
             x = img_to_array(img, data_format=self.data_format)
-            x = self.image_data_generator.random_transform(x)
-            x = self.image_data_generator.standardize(x)
+            if self.image_data_generator:
+                x = self.image_data_generator.random_transform(x)
+                x = self.image_data_generator.standardize(x)
             batch_x[i] = x
+        if self.batch_handler:
+            batch_x = self.batch_handler(batch_x)
         # optionally save augmented images to disk for debugging purposes
         if self.save_to_dir:
             for i, j in enumerate(index_array):
