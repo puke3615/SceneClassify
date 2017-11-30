@@ -26,7 +26,12 @@ class XceptionTrainableClassifier(BaseClassifier):
         return model
 
     def data_generator(self, path_image, train=True, random_prob=1.0):
-        return BaseClassifier.data_generator(self, path_image, train, random_prob)
+        generator = BaseClassifier.data_generator(self, path_image, train, random_prob)
+        generator.multi_thread = True
+        generator.threads = 5
+        generator.queue_size = 10
+        generator.log = True
+        return generator
 
 
 if __name__ == '__main__':

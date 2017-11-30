@@ -1,4 +1,5 @@
 from keras.applications.xception import *
+from generator_wrapper import *
 from keras.optimizers import *
 from keras.callbacks import *
 from keras.models import *
@@ -34,13 +35,13 @@ class BaseClassifier(object):
         self._compiled = False
 
     def data_generator(self, path_image, train=True, random_prob=0.5):
-        return DirectoryIterator(
+        return GeneratorWrapper(
             path_image, None,
             classes=['%02d' % i for i in range(CLASSES)],
             target_size=(self.im_size, self.im_size),
             batch_size=self.batch_size,
             class_mode='categorical',
-            batch_handler=lambda x: func_batch_handle(x, train, random_prob)
+            batch_handler=lambda x: func_batch_handle(x, train, random_prob),
         )
 
     def build_model(self):

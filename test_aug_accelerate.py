@@ -73,11 +73,22 @@ def aug():
     var = [im_utils.aug_images([image])[0] for image in images]
 
 
-TASK_MODE = [None, 'Thread', 'Process']
-pool = multiprocessing.Pool()
-summary(
-    lambda: summary(lambda: invoke(aug, 10, 'Thread', True), n_test=10, name='Aug[%d]' % COUNT),
-    name='Total'
-)
-pool.close()
-pool.join()
+class Pool:
+    def __init__(self):
+        self.pool = multiprocessing.Pool()
+
+    def __enter__(self):
+        return self.pool
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.pool.close()
+        self.pool.join()
+
+
+if __name__ == '__main__':
+    TASK_MODE = [None, 'Thread', 'Process']
+    with Pool() as pool:
+        summary(
+            lambda: summary(lambda: invoke(aug, 10, 'Process', True), n_test=10, name='Aug[%d]' % COUNT),
+            name='Total'
+        )
