@@ -35,7 +35,7 @@ class BaseClassifier(object):
         self._compiled = False
 
     def data_generator(self, path_image, train=True, random_prob=0.5, **kwargs):
-        return GeneratorWrapper(
+        return DirectoryIterator(
             path_image, None,
             classes=['%02d' % i for i in range(CLASSES)],
             target_size=(self.im_size, self.im_size),
