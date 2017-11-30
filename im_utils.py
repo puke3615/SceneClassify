@@ -6,18 +6,18 @@ import numpy as np
 import random
 
 
-def func_batch_handle(batch_x, train=True):
+def func_batch_handle(batch_x, train=True, random_prob=0.5):
     if train:
-        batch_x = aug_images(batch_x)
+        batch_x = aug_images(batch_x, random_prob)
     batch_x = scene_preprocess_input(batch_x)
     return batch_x
 
 
-def aug_images(images_data):
+def aug_images(images_data, random_prob=0.5):
     # Sometimes(0.5, ...) applies the given augmenter in 50% of all cases,
     # e.g. Sometimes(0.5, GaussianBlur(0.3)) would blur roughly every second
     # image.
-    sometimes = lambda aug: iaa.Sometimes(0.5, aug)
+    sometimes = lambda aug: iaa.Sometimes(random_prob, aug)
     # Define our sequence of augmentation steps that will be applied to every image.
     seq = iaa.Sequential(
         [

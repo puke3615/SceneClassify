@@ -33,14 +33,14 @@ class BaseClassifier(object):
         self.model = self.build_model()
         self._compiled = False
 
-    def data_generator(self, path_image, train=True):
+    def data_generator(self, path_image, train=True, random_prob=0.5):
         return DirectoryIterator(
             path_image, None,
             classes=['%02d' % i for i in range(CLASSES)],
             target_size=(self.im_size, self.im_size),
             batch_size=self.batch_size,
             class_mode='categorical',
-            batch_handler=lambda x: func_batch_handle(x, train)
+            batch_handler=lambda x: func_batch_handle(x, train, random_prob)
         )
 
     def build_model(self):
