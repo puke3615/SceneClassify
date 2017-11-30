@@ -6,6 +6,14 @@ import numpy as np
 import random
 
 
+class PoolHolder(object):
+    def __init__(self, pool=None):
+        self.pool = pool
+
+
+holder = PoolHolder()
+
+
 def _process_image_worker(tup):
     process, img, random_prob = tup
     ret = process(img, random_prob)
@@ -14,14 +22,13 @@ def _process_image_worker(tup):
 
 def func_batch_handle_with_multi_process(batch_x, train=True, random_prob=0.5, standard=True):
     if train:
-        import multiprocessing
-        pool = multiprocessing.Pool()
-        result = pool.map(
+        if not holder.pool:
+            import multiprocessing
+            holder.pool = multiprocessing.Pool()
+        result = holder.pool.map(
             _process_image_worker,
             ((aug_images_single, image, random_prob) for image in batch_x)
         )
-        pool.close()
-        pool.join()
         batch_x = np.array(result)
     if standard:
         batch_x = scene_preprocess_input(batch_x)
