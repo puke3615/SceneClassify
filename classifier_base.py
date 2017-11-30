@@ -34,7 +34,7 @@ class BaseClassifier(object):
         self.model = self.build_model()
         self._compiled = False
 
-    def data_generator(self, path_image, train=True, random_prob=0.5):
+    def data_generator(self, path_image, train=True, random_prob=0.5, **kwargs):
         return GeneratorWrapper(
             path_image, None,
             classes=['%02d' % i for i in range(CLASSES)],
@@ -42,6 +42,7 @@ class BaseClassifier(object):
             batch_size=self.batch_size,
             class_mode='categorical',
             batch_handler=lambda x: func_batch_handle(x, train, random_prob),
+            **kwargs
         )
 
     def build_model(self):

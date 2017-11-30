@@ -1,9 +1,12 @@
-import Queue
-
 from generator import *
 from config import *
 import random
 import time
+
+if is_mac():
+    import Queue as queue
+else:
+    import queue
 
 
 class BatchFetcherThread(threading.Thread):
@@ -31,7 +34,7 @@ class GeneratorWrapper(DirectoryIterator):
         self.queue_size = queue_size
         self.multi_thread = multi_thread
         if self.multi_thread:
-            self._queue = Queue.Queue(queue_size)
+            self._queue = queue.Queue(queue_size)
             self._auto_add(threads)
 
     def _auto_add(self, threads):
@@ -61,4 +64,4 @@ if __name__ == '__main__':
         if i >= 100:
             break
         time.sleep(random.random() * 0.5)
-    print 'Time takes %f second.' % (time.time() - start)
+    print('Time takes %f second.' % (time.time() - start))
