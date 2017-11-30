@@ -121,6 +121,8 @@ class BaseClassifier(object):
             print('\nStop by keyboardInterrupt, try saving weights.')
             # model.save_weights(PATH_WEIGHTS)
             print('Save weights successfully.')
+        finally:
+            im_utils.recycle_pool()
 
 
 if __name__ == '__main__':

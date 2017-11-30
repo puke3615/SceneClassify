@@ -8,6 +8,7 @@ from predictor import *
 from PIL import Image
 from config import *
 import numpy as np
+import im_utils
 import utils
 import json
 import time
@@ -111,19 +112,22 @@ MODE = 'val'
 WEIGHTS_MODE = 'loss'
 if __name__ == '__main__':
     if DUMP_JSON:
-        # single predictor
-        # predictor = KerasPredictor(InceptionRestNetV2Classifier(), 'val')
-        # predictor = KerasPredictor(XceptionClassifier('xception_old_trainable'), None, preprocess=default_preprocess_input)
+        try:
+            # single predictor
+            # predictor = KerasPredictor(InceptionRestNetV2Classifier(), 'val')
+            # predictor = KerasPredictor(XceptionClassifier('xception_old_trainable'), None, preprocess=default_preprocess_input)
 
-        # integrated predictor
-        predictor = IntegratedPredictor([
-            # KerasPredictor(VGG16Classifier(weights_mode=WEIGHTS_MODE), MODE),
-            # KerasPredictor(RestNetClassifier('resnet_adam', weights_mode=WEIGHTS_MODE), MODE),
-            KerasPredictor(XceptionClassifier('xception_resize', weights_mode=WEIGHTS_MODE), 'test'),
-            # KerasPredictor(XceptionClassifier('xception_old_trainable', weights_mode=WEIGHTS_MODE), None, preprocess=default_preprocess_input),
-            # KerasPredictor(InceptionRestNetV2Classifier(weights_mode=WEIGHTS_MODE), MODE),
-        ])
+            # integrated predictor
+            predictor = IntegratedPredictor([
+                # KerasPredictor(VGG16Classifier(weights_mode=WEIGHTS_MODE), MODE),
+                # KerasPredictor(RestNetClassifier('resnet_adam', weights_mode=WEIGHTS_MODE), MODE),
+                KerasPredictor(XceptionClassifier('xception_aug', weights_mode=WEIGHTS_MODE), 'test'),
+                # KerasPredictor(XceptionClassifier('xception_old_trainable', weights_mode=WEIGHTS_MODE), None, preprocess=default_preprocess_input),
+                # KerasPredictor(InceptionRestNetV2Classifier(weights_mode=WEIGHTS_MODE), MODE),
+            ])
 
-        dump_json(predictor)
+            dump_json(predictor)
+        finally:
+            im_utils.recycle_pool()
     if EVAL:
         evaluate(PATH_JSON_DUMP, PATH_VAL_JSON)

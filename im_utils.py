@@ -14,6 +14,11 @@ class PoolHolder(object):
 holder = PoolHolder()
 
 
+def recycle_pool():
+    if holder.pool:
+        holder.pool.close()
+
+
 def _process_image_worker(tup):
     process, img, random_prob = tup
     ret = process(img, random_prob)
