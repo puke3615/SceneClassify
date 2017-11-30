@@ -30,4 +30,4 @@ if __name__ == '__main__':
     # classifier = XceptionClassifier(lr=2e-4)
     # classifier = XceptionClassifier(lr=2e-5)
     classifier = XceptionClassifier('xception_resize', weights_mode='loss', optimizer=Adam(1e-4))
-    classifier.train(class_weight=utils.calculate_class_weight())
+    classifier.train()

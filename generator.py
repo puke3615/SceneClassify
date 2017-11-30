@@ -6,7 +6,6 @@ new preprocessing methods, etc...
 from __future__ import absolute_import
 from __future__ import print_function
 
-import collections
 import numpy as np
 import re
 from scipy import linalg
@@ -23,7 +22,7 @@ from keras import backend as K
 from skimage import data, img_as_float
 from skimage import exposure
 
-# from keras.utils.data_utils import Sequence
+from keras.utils.data_utils import Sequence
 
 try:
     from PIL import Image as pil_image
@@ -764,7 +763,7 @@ class ImageDataGenerator(object):
             self.principal_components = np.dot(np.dot(u, np.diag(1. / np.sqrt(s + self.zca_epsilon))), u.T)
 
 
-class Iterator(collections.Sequence):
+class Iterator(Sequence):
     """Base class for image data iterators.
 
     Every `Iterator` must implement the `_get_batches_of_transformed_samples`

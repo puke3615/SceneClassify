@@ -78,7 +78,7 @@ class BaseClassifier(object):
                 self.optimizer = Nadam(self.lr)
             self.model.compile(loss='categorical_crossentropy', optimizer=self.optimizer, metrics=['accuracy'])
 
-    def train(self, class_weight=None):
+    def train(self, **kwargs):
         # calculate files number
         file_num = utils.calculate_file_num(PATH_TRAIN_IMAGES)
         steps_train = file_num // self.batch_size
@@ -112,7 +112,8 @@ class BaseClassifier(object):
                 validation_data=val_generator,
                 validation_steps=steps_val,
                 verbose=1,
-                class_weight=class_weight,
+                class_weight=utils.calculate_class_weight(),
+                **kwargs
             )
         except KeyboardInterrupt:
             print('\nStop by keyboardInterrupt, try saving weights.')

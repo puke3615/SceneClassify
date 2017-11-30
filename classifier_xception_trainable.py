@@ -35,4 +35,7 @@ if __name__ == '__main__':
         weights_mode='loss',
         optimizer=Adam(1e-3)
     )
-    classifier.train(class_weight=calculate_class_weight())
+    classifier.train(
+        use_multiprocessing=True,
+        workers=5,
+    )
