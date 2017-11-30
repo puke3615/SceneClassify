@@ -7,8 +7,12 @@ import os
 import im_utils
 from config import *
 from matplotlib import pyplot as plt
+"""
+测试图片增强效果
+"""
 
-COUNT = 9
+
+COUNT = 4
 COL = int(np.math.sqrt(COUNT))
 
 
@@ -23,7 +27,9 @@ images = np.array(
 )
 
 start = time.time()
-images = [im_utils.aug_images([image])[0] for image in images]
+for _ in range(1):
+    # images = [im_utils.aug_images([image])[0] for image in images]
+    images = im_utils.func_batch_handle_with_multi_process(images, True, standard=False)
 print('Take %f seconds.' % (time.time() - start))
 
 ROW = len(images) // COL + (0 if len(images) % COL == 0 else 1)

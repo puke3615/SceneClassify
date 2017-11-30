@@ -55,7 +55,7 @@ class KerasPredictor(Predictor):
         model = classifier.model
         # set default batch_handler if not exists
         if not batch_handler:
-            batch_handler = lambda x: func_batch_handle(x, False)
+            batch_handler = lambda x: func_batch_handle_with_multi_process(x, False)
         h, w = model.input_shape[1:3]
         assert h == w, 'Width is not equal with height.'
         Predictor.__init__(self, model.predict, w, mode,

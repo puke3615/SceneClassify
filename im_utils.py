@@ -6,6 +6,32 @@ import numpy as np
 import random
 
 
+def _process_image_worker(tup):
+    process, img, random_prob = tup
+    ret = process(img, random_prob)
+    return ret
+
+
+def func_batch_handle_with_multi_process(batch_x, train=True, random_prob=0.5, standard=True):
+    if train:
+        import multiprocessing
+        pool = multiprocessing.Pool()
+        result = pool.map(
+            _process_image_worker,
+            ((aug_images_single, image, random_prob) for image in batch_x)
+        )
+        pool.close()
+        pool.join()
+        batch_x = np.array(result)
+    if standard:
+        batch_x = scene_preprocess_input(batch_x)
+    return batch_x
+
+
+def aug_images_single(images_data, random_prob):
+    return aug_images([images_data], random_prob)[0]
+
+
 def func_batch_handle(batch_x, train=True, random_prob=0.5):
     if train:
         batch_x = aug_images(batch_x, random_prob)

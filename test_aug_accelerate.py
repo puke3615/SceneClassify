@@ -9,6 +9,10 @@ import os
 import im_utils
 from config import *
 
+"""
+测试单线程、多线程、多进程的时间差异
+"""
+
 COUNT = 32
 
 

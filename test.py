@@ -1,5 +1,10 @@
+# coding=utf-8
 import numpy as np
 import heapq
+
+"""
+一般性测试
+"""
 
 a = [
     [2, 1, 3],

@@ -1,6 +1,11 @@
+# coding=utf-8
 from generator import ImageDataGenerator
 from im_utils import *
 from config import *
+
+"""
+测试图片生成器
+"""
 
 
 def image_generator(train=True):

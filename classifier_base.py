@@ -41,7 +41,7 @@ class BaseClassifier(object):
             target_size=(self.im_size, self.im_size),
             batch_size=self.batch_size,
             class_mode='categorical',
-            batch_handler=lambda x: func_batch_handle(x, train, random_prob),
+            batch_handler=lambda x: func_batch_handle_with_multi_process(x, train, random_prob),
             **kwargs
         )
 
