@@ -10,8 +10,8 @@ else:
 
 
 class BatchFetcherThread(threading.Thread):
-    def __init__(self, func_next, queue, group=None, target=None, name=None, args=(), kwargs=None, verbose=None):
-        super(BatchFetcherThread, self).__init__(group, target, name, args, kwargs, verbose)
+    def __init__(self, func_next, queue, group=None, target=None, name=None, args=(), kwargs=None, ):
+        super(BatchFetcherThread, self).__init__(group, target, name, args, kwargs)
         self.func_next = func_next
         self.queue = queue
 
