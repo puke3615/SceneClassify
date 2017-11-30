@@ -18,7 +18,7 @@ class XceptionTrainableClassifier(BaseClassifier):
         weights = 'imagenet' if self.context['load_imagenet_weights'] else None
         model_xception = Xception(include_top=False, weights=weights,
                                   input_shape=(self.im_size, self.im_size, 3), pooling='avg')
-        for layer in model_xception.layers[:-5]:
+        for layer in model_xception.layers[:-10]:
             layer.trainable = False
         x = model_xception.output
         x = Dense(CLASSES, activation='softmax')(x)
@@ -35,7 +35,4 @@ if __name__ == '__main__':
         weights_mode='loss',
         optimizer=Adam(1e-3)
     )
-    classifier.train(
-        use_multiprocessing=True,
-        workers=5,
-    )
+    classifier.train()
