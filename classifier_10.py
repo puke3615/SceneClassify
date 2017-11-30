@@ -5,7 +5,7 @@ from config import *
 
 
 class SmallClassifier(BaseClassifier):
-    def __init__(self, name='small', lr=2e-3, batch_size=BATCH_SIZE, weights_mode='acc', optimizer=None):
+    def __init__(self, name='small', lr=1e-3, batch_size=BATCH_SIZE, weights_mode='acc', optimizer=None):
         BaseClassifier.__init__(self,name, IM_SIZE_224,
                                 lr, batch_size, weights_mode, optimizer)
 
@@ -31,5 +31,5 @@ class SmallClassifier(BaseClassifier):
 
 
 if __name__ == '__main__':
-    classifier = SmallClassifier(lr=2e-3)
+    classifier = SmallClassifier(lr=1e-3)
     classifier.train()

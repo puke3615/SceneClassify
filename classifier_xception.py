@@ -9,7 +9,7 @@ from config import *
 
 
 class XceptionClassifier(BaseClassifier):
-    def __init__(self, name='xception', lr=2e-3, batch_size=BATCH_SIZE, weights_mode='acc', optimizer=None):
+    def __init__(self, name='xception', lr=1e-3, batch_size=BATCH_SIZE, weights_mode='acc', optimizer=None):
         BaseClassifier.__init__(self, name, IM_SIZE_299,
                                 lr, batch_size, weights_mode, optimizer)
 
@@ -26,8 +26,8 @@ class XceptionClassifier(BaseClassifier):
 
 
 if __name__ == '__main__':
-    # classifier = XceptionClassifier(lr=2e-3)
-    # classifier = XceptionClassifier(lr=2e-4)
-    # classifier = XceptionClassifier(lr=2e-5)
-    classifier = XceptionClassifier('xception_resize', weights_mode='loss', optimizer=Adam(1e-4))
+    # classifier = XceptionClassifier(lr=1e-3)
+    # classifier = XceptionClassifier(lr=1e-4)
+    # classifier = XceptionClassifier(lr=1e-5)
+    classifier = XceptionClassifier('xception_resize', lr=1e-4, weights_mode='loss')
     classifier.train()

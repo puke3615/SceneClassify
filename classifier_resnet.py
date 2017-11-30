@@ -6,7 +6,7 @@ from config import *
 
 
 class RestNetClassifier(BaseClassifier):
-    def __init__(self, name='resnet', lr=2e-3, batch_size=BATCH_SIZE, weights_mode='acc', optimizer=None):
+    def __init__(self, name='resnet', lr=1e-3, batch_size=BATCH_SIZE, weights_mode='acc', optimizer=None):
         BaseClassifier.__init__(self, name, IM_SIZE_224,
                                 lr, batch_size, weights_mode, optimizer)
 
@@ -23,6 +23,6 @@ class RestNetClassifier(BaseClassifier):
 
 
 if __name__ == '__main__':
-    # classifier = RestNetClassifier(lr=2e-3)
-    classifier = RestNetClassifier('resnet_adam', optimizer='adam')
+    # classifier = RestNetClassifier(lr=1e-3)
+    classifier = RestNetClassifier('resnet_adam')
     classifier.train()

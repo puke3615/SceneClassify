@@ -15,7 +15,7 @@ import os
 
 
 class BaseClassifier(object):
-    def __init__(self, name, im_size, lr=2e-3, batch_size=BATCH_SIZE, weights_mode='acc', optimizer=None):
+    def __init__(self, name, im_size, lr=1e-3, batch_size=BATCH_SIZE, weights_mode='acc', optimizer=None):
         # receive params
         self.name = name
         self.im_size = im_size
@@ -77,7 +77,7 @@ class BaseClassifier(object):
         if not self._compiled or force:
             self._compiled = True
             if not self.optimizer:
-                self.optimizer = Nadam(self.lr)
+                self.optimizer = Adam(self.lr)
             self.model.compile(loss='categorical_crossentropy', optimizer=self.optimizer, metrics=['accuracy'])
 
     def train(self, **kwargs):

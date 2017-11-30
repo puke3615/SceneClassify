@@ -6,7 +6,7 @@ from config import *
 
 
 class InceptionRestNetV2Classifier(BaseClassifier):
-    def __init__(self, name='inception_resnet_v2', lr=2e-3, batch_size=BATCH_SIZE, weights_mode='acc', optimizer=None):
+    def __init__(self, name='inception_resnet_v2', lr=1e-3, batch_size=BATCH_SIZE, weights_mode='acc', optimizer=None):
         BaseClassifier.__init__(self, name, IM_SIZE_299,
                                 lr, batch_size, weights_mode, optimizer)
 
@@ -23,5 +23,5 @@ class InceptionRestNetV2Classifier(BaseClassifier):
 
 
 if __name__ == '__main__':
-    classifier = InceptionRestNetV2Classifier(lr=2e-3)
+    classifier = InceptionRestNetV2Classifier(lr=1e-3)
     classifier.train()

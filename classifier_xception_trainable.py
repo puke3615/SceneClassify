@@ -10,7 +10,7 @@ import generator
 
 
 class XceptionTrainableClassifier(BaseClassifier):
-    def __init__(self, name='xception_trainable', lr=2e-3, batch_size=BATCH_SIZE, weights_mode='acc', optimizer=None):
+    def __init__(self, name='xception_trainable', lr=1e-3, batch_size=BATCH_SIZE, weights_mode='acc', optimizer=None):
         BaseClassifier.__init__(self, name, IM_SIZE_299,
                                 lr, batch_size, weights_mode, optimizer)
 
@@ -32,7 +32,7 @@ class XceptionTrainableClassifier(BaseClassifier):
 if __name__ == '__main__':
     classifier = XceptionTrainableClassifier(
         name='xception_aug',
+        lr=1e-4,
         weights_mode='loss',
-        optimizer=Adam(1e-4)
     )
     classifier.train()
