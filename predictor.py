@@ -22,7 +22,7 @@ def parse_prediction(files, predictions, top=3, return_with_prob=False):
 
 
 class Predictor:
-    def __init__(self, func_predict, target_size, mode='val', batch_handler=None):
+    def __init__(self, func_predict, target_size, mode=None, batch_handler=None):
         self.func_predict = func_predict
         self.target_size = target_size
         self.mode = mode
@@ -46,7 +46,7 @@ class Predictor:
 
 
 class KerasPredictor(Predictor):
-    def __init__(self, classifier, mode='val', batch_handler=None):
+    def __init__(self, classifier, mode=None, batch_handler=None):
         assert isinstance(classifier, BaseClassifier), \
             'The classifier is not a instance of %s' % (type(BaseClassifier))
         self.model = classifier.model

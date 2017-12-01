@@ -1,3 +1,9 @@
+from classifier_inception_resnet_v2 import *
+from classifier_xception_trainable import *
+from classifier_inception_v3 import *
+from classifier_xception import *
+from classifier_resnet import *
+from classifier_vgg16 import *
 from predictor import *
 from config import *
 import numpy as np
@@ -26,7 +32,7 @@ def dump_ndarray(data, file):
 def load_ndarry(file):
     try:
         result = np.load(file)
-        print ('Load %s successfully.' % file)
+        print('Load %s successfully.' % file)
         return result
     except:
         raise Exception('Load %s failure.' % file)
@@ -53,7 +59,7 @@ class WeightReader(object):
         self.label_weight_path = self._get_weights_path('label_weight')
 
     def _get_weights_path(self, sub_name):
-        prefix = os.path.basename(self.weights).split('.')[0]
+        prefix = os.path.basename(self.weights).replace('.h5', '')[0]
         filename = '%s_%s.npy' % (prefix, sub_name)
         return os.path.join(self.predictor_cache_dir, filename)
 
@@ -88,15 +94,25 @@ class WeightReader(object):
         return self.perform_eval()[0]
 
     def get_label_weights(self, use_cache=True):
-        if use_cache and os.path.isfile(self.model_weight_path):
-            return load_ndarry(self.model_weight_path)
+        if use_cache and os.path.isfile(self.label_weight_path):
+            return load_ndarry(self.label_weight_path)
         return self.perform_eval()[1]
 
 
 if __name__ == '__main__':
-    predictor = KerasPredictor(XceptionClassifier(), None)
-    reader_params = {'batch_size': 32}
-    reader = create_weight_reader_by_predictor(predictor)
-    model_weights = reader.get_model_weights()
-    print model_weights.shape
-    print model_weights
+    predictors = [
+        KerasPredictor(XceptionTrainableClassifier('xception_aug', weights_mode='loss'), None),
+        KerasPredictor(InceptionRestNetV2Classifier(weights_mode='loss'), None),
+        KerasPredictor(InceptionV3Classifier(weights_mode='loss'), None),
+        KerasPredictor(VGG16Classifier(weights_mode='loss'), None),
+        KerasPredictor(RestNetClassifier('resnet_adam', weights_mode='loss'), None),
+    ]
+
+    for predictor in predictors:
+        print(predictor.name)
+        reader = create_weight_reader_by_predictor(predictor, batch_size=128)
+        model_weights = reader.get_model_weights()
+        label_weights = reader.get_label_weights()
+        format_label_weights = label_weights + np.array(range(80))
+        print(model_weights)
+        print(format_label_weights)

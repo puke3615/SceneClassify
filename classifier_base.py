@@ -15,7 +15,7 @@ import os
 
 
 class BaseClassifier(object):
-    def __init__(self, name, im_size, lr=1e-3, batch_size=BATCH_SIZE, weights_mode='acc', optimizer=None):
+    def __init__(self, name, im_size, lr=1e-3, batch_size=BATCH_SIZE, weights_mode='loss', optimizer=None):
         # receive params
         self.name = name
         self.im_size = im_size

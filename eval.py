@@ -1,5 +1,3 @@
-from keras.engine.training import Model
-import classifier_xception_trainable as xt
 from classifier_inception_resnet_v2 import *
 from classifier_inception_v3 import *
 from classifier_xception import *
@@ -124,9 +122,9 @@ def evaluate(eval_json, target_json):
 
 DUMP_JSON = True
 EVAL = True
-MODE = 'flip'  # ['train', 'val', 'test', 'flip', None]
+MODE = None  # ['train', 'val', 'test', 'flip', None]
 WEIGHTS_MODE = 'loss'  # ['acc', 'loss']
-INTEGRATED_POLICY = 'avg'  # ['avg', 'model_weight', 'label_weight', 'ada_boost']
+INTEGRATED_POLICY = 'ada_boost'  # ['avg', 'model_weight', 'label_weight', 'ada_boost']
 if __name__ == '__main__':
     if DUMP_JSON:
         try:
@@ -136,12 +134,12 @@ if __name__ == '__main__':
 
             # integrated predictor
             predictor = IntegratedPredictor([
-                # KerasPredictor(VGG16Classifier(weights_mode=WEIGHTS_MODE), MODE),
-                # KerasPredictor(RestNetClassifier('resnet_adam', weights_mode=WEIGHTS_MODE), MODE),
+                KerasPredictor(VGG16Classifier(weights_mode=WEIGHTS_MODE), MODE),
+                KerasPredictor(RestNetClassifier('resnet_adam', weights_mode=WEIGHTS_MODE), MODE),
                 KerasPredictor(XceptionClassifier('xception_aug', weights_mode=WEIGHTS_MODE), MODE),
                 # KerasPredictor(XceptionClassifier('xception_old_trainable', weights_mode=WEIGHTS_MODE), None, preprocess=default_preprocess_input),
                 KerasPredictor(InceptionV3Classifier(weights_mode=WEIGHTS_MODE), MODE),
-                # KerasPredictor(InceptionRestNetV2Classifier(weights_mode=WEIGHTS_MODE), MODE),
+                KerasPredictor(InceptionRestNetV2Classifier(weights_mode=WEIGHTS_MODE), MODE),
             ], policy=INTEGRATED_POLICY)
 
             dump_json(predictor, batch_size=128)

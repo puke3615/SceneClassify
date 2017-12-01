@@ -9,7 +9,7 @@ from config import *
 
 
 class XceptionClassifier(BaseClassifier):
-    def __init__(self, name='xception', lr=1e-3, batch_size=BATCH_SIZE, weights_mode='acc', optimizer=None):
+    def __init__(self, name='xception', lr=1e-3, batch_size=BATCH_SIZE, weights_mode='loss', optimizer=None):
         BaseClassifier.__init__(self, name, IM_SIZE_299,
                                 lr, batch_size, weights_mode, optimizer)
 
@@ -17,7 +17,7 @@ class XceptionClassifier(BaseClassifier):
         weights = 'imagenet' if self.context['load_imagenet_weights'] else None
         model_xception = Xception(include_top=False, weights=weights,
                                   input_shape=(self.im_size, self.im_size, 3), pooling='avg')
-        for layer in model_xception.layers[:-80]:
+        for layer in model_xception.layers[:-60]:
             layer.trainable = False
         x = model_xception.output
         x = Dense(CLASSES, activation='softmax')(x)
