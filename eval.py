@@ -122,7 +122,7 @@ if __name__ == '__main__':
             predictor = IntegratedPredictor([
                 # KerasPredictor(VGG16Classifier(weights_mode=WEIGHTS_MODE), MODE),
                 # KerasPredictor(RestNetClassifier('resnet_adam', weights_mode=WEIGHTS_MODE), MODE),
-                # KerasPredictor(XceptionClassifier('xception_aug', weights_mode=WEIGHTS_MODE), MODE),
+                KerasPredictor(XceptionClassifier('xception_aug', weights_mode=WEIGHTS_MODE), MODE),
                 # KerasPredictor(XceptionClassifier('xception_old_trainable', weights_mode=WEIGHTS_MODE), None, preprocess=default_preprocess_input),
                 KerasPredictor(InceptionV3Classifier(weights_mode=WEIGHTS_MODE), MODE),
                 # KerasPredictor(InceptionRestNetV2Classifier(weights_mode=WEIGHTS_MODE), MODE),
