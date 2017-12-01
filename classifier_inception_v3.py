@@ -23,5 +23,5 @@ class InceptionV3Classifier(BaseClassifier):
 
 
 if __name__ == '__main__':
-    classifier = InceptionV3Classifier(lr=1e-4)
+    classifier = InceptionV3Classifier(lr=1e-5)
     classifier.train()
