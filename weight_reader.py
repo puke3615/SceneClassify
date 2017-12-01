@@ -59,7 +59,7 @@ class WeightReader(object):
         self.label_weight_path = self._get_weights_path('label_weight')
 
     def _get_weights_path(self, sub_name):
-        prefix = os.path.basename(self.weights).replace('.h5', '')[0]
+        prefix = os.path.basename(self.weights).replace('.h5', '')
         filename = '%s_%s.npy' % (prefix, sub_name)
         return os.path.join(self.predictor_cache_dir, filename)
 
@@ -101,15 +101,15 @@ class WeightReader(object):
 
 if __name__ == '__main__':
     predictors = [
-        KerasPredictor(XceptionTrainableClassifier('xception_aug', weights_mode='loss'), None),
-        KerasPredictor(InceptionRestNetV2Classifier(weights_mode='loss'), None),
-        KerasPredictor(InceptionV3Classifier(weights_mode='loss'), None),
-        KerasPredictor(VGG16Classifier(weights_mode='loss'), None),
-        KerasPredictor(RestNetClassifier('resnet_adam', weights_mode='loss'), None),
+        KerasPredictor(XceptionTrainableClassifier('xception_aug'), None),
+        KerasPredictor(InceptionRestNetV2Classifier(), None),
+        KerasPredictor(InceptionV3Classifier(), None),
+        KerasPredictor(VGG16Classifier(), None),
+        KerasPredictor(RestNetClassifier('resnet_adam'), None),
     ]
 
     for predictor in predictors:
-        print(predictor.name)
+        print('\n[%s]' % predictor.name)
         reader = create_weight_reader_by_predictor(predictor, batch_size=128)
         model_weights = reader.get_model_weights()
         label_weights = reader.get_label_weights()
