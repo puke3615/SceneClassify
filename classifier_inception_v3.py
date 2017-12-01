@@ -14,7 +14,7 @@ class InceptionV3Classifier(BaseClassifier):
         weights = 'imagenet' if self.context['load_imagenet_weights'] else None
         model_xception = InceptionV3(include_top=False, weights=weights,
                                      input_shape=(self.im_size, self.im_size, 3), pooling='avg')
-        for layer in model_xception.layers:
+        for layer in model_xception.layers[:-20]:
             layer.trainable = False
         x = model_xception.output
         x = Dense(CLASSES, activation='softmax')(x)

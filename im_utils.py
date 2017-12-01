@@ -218,7 +218,7 @@ def im2array(files, target_size, mode=None, preprocess=None):
 
     if not isinstance(files, list) and not isinstance(files, tuple):
         files = [files]
-    if mode not in ['train', 'val', 'test', None]:
+    if mode not in ['train', 'val', 'test', 'flip', None]:
         raise Exception('The mode named "%s" not define.' % mode)
     outputs = []
     for file in files:
@@ -235,12 +235,22 @@ def im2array(files, target_size, mode=None, preprocess=None):
             images = boundary_crop(img, target_size)
             for image in images:
                 outputs.append(handle(np.asarray(image)))
+        elif mode == 'flip':
+            images = resize_and_flip(img, target_size)
+            for image in images:
+                outputs.append(handle(np.asarray(image)))
         elif mode is None:
             img = img.resize((target_size, target_size))
             outputs.append(handle(np.asarray(img)))
     patch = len(outputs) // len(files)
     outputs = np.array(outputs)
     return outputs, patch
+
+
+def resize_and_flip(img, target_size):
+    # output 2 samples
+    img = img.resize([target_size, target_size])
+    return [img, img.transpose(Image.FLIP_LEFT_RIGHT)]
 
 
 def boundary_crop(img, target_size):
