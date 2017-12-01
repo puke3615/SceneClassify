@@ -63,32 +63,56 @@ class KerasPredictor(Predictor):
 
 
 class IntegratedPredictor(object):
-    POLICIES = ['avg', 'weight', 'label_weight']
+    POLICIES = ['avg', 'model_weight', 'label_weight', 'ada_boost']
     DEFAULT_POLICY = 'avg'
 
-    def __init__(self, predictors, policy='avg', weights=None, top=3, return_with_prob=False):
+    def __init__(self, predictors, policy='avg', weights=None,
+                 top=3, return_with_prob=False, standard=False,
+                 model_weight=None, label_weight=None):
         self.predictors = predictors
         self.policy = policy if policy in self.POLICIES else self.DEFAULT_POLICY
         self.weights = weights
         self.top = top
         self.return_with_prob = return_with_prob
+        self.standard = standard
+        self.model_weight = model_weight
+        self.label_weight = label_weight
 
     def __call__(self, files, **kwargs):
         if isinstance(files, str):
             files = [files]
+        # get prediction of every predictor
         predictions = [predictor.perform_predict(files, **kwargs) for predictor in self.predictors]
+        # integrated predictions
+        integrated_predictions = self.integrated_prob(predictions)
+        # parse predictions
+        return parse_prediction(files, integrated_predictions, self.top, self.return_with_prob)
+
+    def integrated_prob(self, predictions):
+        predictions = np.array(predictions)
+        result = None
         if self.policy == 'avg':
-            prediction_summary = np.mean(predictions, axis=0)
-        elif self.policy == 'weight':
-            assert self.weights, 'The weights is None.'
-            assert len(self.weights) == len(predictions), \
-                'The weights length %d is not equal with %d' % (len(self.weights), len(predictions))
-            return np.sum(weight * prediction for weight, prediction in zip(self.weights, predictions))
+            result = np.mean(predictions, axis=0)
+        elif self.policy == 'model_weight':
+            assert self.model_weight, 'The weights is None.'
+            assert len(self.model_weight) == len(predictions), \
+                'The weights length %d is not equal with %d' % (len(self.model_weight), len(predictions))
+            c_ns = self.model_weight
+            result = np.sum(c_n * p_nj for c_n, p_nj in zip(c_ns, predictions))
         elif self.policy == 'label_weight':
-            raise NotImplementedError('')
-        else:
-            raise Exception('No support for %s.' % self.policy)
-        return parse_prediction(files, prediction_summary, self.top, self.return_with_prob)
+            c_njs = self.label_weight
+            result = np.sum(c_nj * p_nj for c_nj, p_nj in zip(c_njs, predictions))
+        elif self.policy == 'ada_boost':
+            c_ns = self.model_weight
+            c_njs = self.label_weight
+            alphas = [np.log(c_n / (1 - c_n + 1e-6)) / 2 for c_n in c_ns]
+            result = np.sum(c_nj * p_nj * alpha for alpha, c_nj, p_nj in zip(alphas, c_njs, predictions))
+        if result is None:
+            raise 'Not support for policy named "%s".' % self.policy
+        elif self.standard:
+            denominators = np.sum(result, axis=1)
+            result = [r / denominator for r, denominator in zip(result, denominators)]
+        return result
 
 
 if __name__ == '__main__':

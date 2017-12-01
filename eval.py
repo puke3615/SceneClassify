@@ -109,8 +109,9 @@ def evaluate(eval_json, target_json):
 
 DUMP_JSON = True
 EVAL = True
-MODE = 'flip' # ['train', 'val', 'test', 'flip', None]
-WEIGHTS_MODE = 'loss' # ['acc', 'loss']
+MODE = 'flip'  # ['train', 'val', 'test', 'flip', None]
+WEIGHTS_MODE = 'loss'  # ['acc', 'loss']
+INTEGRATED_POLICY = 'avg'  # ['avg', 'model_weight', 'label_weight', 'ada_boost']
 if __name__ == '__main__':
     if DUMP_JSON:
         try:
@@ -126,7 +127,7 @@ if __name__ == '__main__':
                 # KerasPredictor(XceptionClassifier('xception_old_trainable', weights_mode=WEIGHTS_MODE), None, preprocess=default_preprocess_input),
                 KerasPredictor(InceptionV3Classifier(weights_mode=WEIGHTS_MODE), MODE),
                 # KerasPredictor(InceptionRestNetV2Classifier(weights_mode=WEIGHTS_MODE), MODE),
-            ])
+            ], policy=INTEGRATED_POLICY)
 
             dump_json(predictor, batch_size=128)
         finally:
