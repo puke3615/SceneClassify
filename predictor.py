@@ -21,20 +21,17 @@ def parse_prediction(files, predictions, top=3, return_with_prob=False):
 
 
 class Predictor:
-    def __init__(self, func_predict, target_size, mode='val',
-                 batch_handler=None, top=3, return_with_prob=False):
+    def __init__(self, func_predict, target_size, mode='val', batch_handler=None):
         self.func_predict = func_predict
         self.target_size = target_size
         self.mode = mode
-        self.top = top
         self.batch_handler = batch_handler
-        self.return_with_prob = return_with_prob
 
-    def __call__(self, files, **kwargs):
+    def __call__(self, files, top=3, return_with_prob=False, **kwargs):
         if isinstance(files, str):
             files = [files]
         predictions = self.perform_predict(files, **kwargs)
-        return parse_prediction(files, predictions, self.top, self.return_with_prob)
+        return parse_prediction(files, predictions, top, return_with_prob)
 
     def perform_predict(self, files, **kwargs):
         inputs, patch = im2array(files, self.target_size, self.mode)
@@ -48,37 +45,34 @@ class Predictor:
 
 
 class KerasPredictor(Predictor):
-    def __init__(self, classifier, mode='val', batch_handler=None,
-                 top=3, return_with_prob=False):
+    def __init__(self, classifier, mode='val', batch_handler=None):
         assert isinstance(classifier, BaseClassifier), \
             'The classifier is not a instance of %s' % (type(BaseClassifier))
-        model = classifier.model
+        self.model = classifier.model
+        self.weights = classifier.weights
+        self.name = classifier.name
         # set default batch_handler if not exists
         if not batch_handler:
             batch_handler = lambda x: func_batch_handle_with_multi_process(x, False)
-        h, w = model.input_shape[1:3]
+        h, w = self.model.input_shape[1:3]
         assert h == w, 'Width is not equal with height.'
-        Predictor.__init__(self, model.predict, w, mode,
-                           batch_handler, top, return_with_prob)
+        Predictor.__init__(self, self.model.predict, w, mode, batch_handler)
 
 
 class IntegratedPredictor(object):
     POLICIES = ['avg', 'model_weight', 'label_weight', 'ada_boost']
     DEFAULT_POLICY = 'avg'
 
-    def __init__(self, predictors, policy='avg', weights=None,
-                 top=3, return_with_prob=False, standard=False,
+    def __init__(self, predictors, policy='avg', weights=None, standard=False,
                  model_weight=None, label_weight=None):
         self.predictors = predictors
         self.policy = policy if policy in self.POLICIES else self.DEFAULT_POLICY
         self.weights = weights
-        self.top = top
-        self.return_with_prob = return_with_prob
         self.standard = standard
         self.model_weight = model_weight
         self.label_weight = label_weight
 
-    def __call__(self, files, **kwargs):
+    def __call__(self, files, top=3, return_with_prob=False, **kwargs):
         if isinstance(files, str):
             files = [files]
         # get prediction of every predictor
@@ -86,7 +80,7 @@ class IntegratedPredictor(object):
         # integrated predictions
         integrated_predictions = self.integrated_prob(predictions)
         # parse predictions
-        return parse_prediction(files, integrated_predictions, self.top, self.return_with_prob)
+        return parse_prediction(files, integrated_predictions, top, return_with_prob)
 
     def integrated_prob(self, predictions):
         predictions = np.array(predictions)
@@ -119,7 +113,7 @@ if __name__ == '__main__':
     path = os.path.join(config.PATH_TRAIN_IMAGES, '00/919aa50cc17b08fa836eb3784349da0765131ab8.jpg')
 
     # single predictor
-    predictor = KerasPredictor(VGG16Classifier(), 'val', return_with_prob=True)
+    predictor = KerasPredictor(VGG16Classifier(), 'val')
 
     # integrated predictor
     # predictor = IntegratedPredictor([
@@ -127,5 +121,5 @@ if __name__ == '__main__':
     #     KerasPredictor(classifier, 'val'),
     # ], return_with_prob=True)
 
-    prediction = predictor(path)
+    prediction = predictor(path, return_with_prob=True)
     print(prediction)

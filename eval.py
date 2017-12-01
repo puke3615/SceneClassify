@@ -16,8 +16,28 @@ import time
 import os
 
 
+# noinspection PyTypeChecker
 def dump_json(predictor, save_path=PATH_JSON_DUMP, target_dir=PATH_VAL_IMAGES, batch_size=16):
-    print('Start dump json...')
+    result = eval_predictor(predictor, target_dir, batch_size, dump_json_handler)
+    dir = os.path.dirname(save_path)
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    with open(save_path, 'w') as f:
+        json.dump(result, f)
+        print('Dump finished.')
+
+
+def dump_json_handler(image_id, label_id):
+    return {'image_id': image_id, 'label_id': label_id}
+
+
+def default_handler(image_id, label_id):
+    return image_id, label_id
+
+
+def eval_predictor(func_predict, target_dir=PATH_VAL_IMAGES,
+                   batch_size=32, item_handler=default_handler):
+    print('Start eval predictor...')
     result = []
     images = utils.get_files(target_dir)
     n_images = len(images)
@@ -25,30 +45,25 @@ def dump_json(predictor, save_path=PATH_JSON_DUMP, target_dir=PATH_VAL_IMAGES, b
     n_last_batch = n_images % batch_size
 
     def predict_batch(start, end):
-        predictions = predictor(images[start: end])
+        predictions = func_predict(images[start: end])
         image_ids = [os.path.basename(image) for image in images[start: end]]
-        return [{'image_id': image_ids[i], 'label_id': predictions[i]} for i in range(end - start)]
+        return [item_handler(image_ids[i], predictions[i]) for i in range(end - start)]
 
     import sys
     for batch in range(n_batch):
         index = batch * batch_size
         batch_result = predict_batch(index, index + batch_size)
         result.extend(batch_result)
-        sys.stdout.write('\rDumping %d/%d' % (index + batch_size, n_images))
+        sys.stdout.write('\rProcessing %d/%d' % (index + batch_size, n_images))
         sys.stdout.flush()
     if n_last_batch:
         index = n_batch * batch_size
         batch_result = predict_batch(index, index + n_last_batch)
         result.extend(batch_result)
-        sys.stdout.write('\rDumping %d/%d' % (index + n_last_batch, n_images))
+        sys.stdout.write('\rProcessing %d/%d' % (index + n_last_batch, n_images))
         sys.stdout.flush()
     sys.stdout.write('\n')
-    dir = os.path.dirname(save_path)
-    if not os.path.exists(dir):
-        os.makedirs(dir)
-    with open(save_path, 'w') as f:
-        json.dump(result, f)
-        print('Dump finished.')
+    return result
 
 
 def __load_data(submit_file, reference_file, result):

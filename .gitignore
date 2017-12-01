@@ -5,3 +5,4 @@ __pycache__
 /params/
 /log/
 /eval_json/
+/cache/

@@ -1,4 +1,9 @@
+# coding=utf-8
 import numpy as np
+
+"""
+测试模型集成器
+"""
 
 
 def mock(shape, value=1):

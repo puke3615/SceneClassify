@@ -39,6 +39,7 @@ def CONTEXT(name, **kwargs):
     return {
         'weights': 'params/%s/{epoch:05d}-{val_loss:.4f}-{val_acc:.4f}.h5' % name,
         'summary': 'log/%s' % name,
+        'predictor_cache_dir': 'cache/%s' % name,
         'load_imagenet_weights': is_windows(),
     }
 
