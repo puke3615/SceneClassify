@@ -32,12 +32,11 @@ def load_ndarry(file):
         raise Exception('Load %s failure.' % file)
 
 
-def create_weight_reader_by_predictor(predictor, reader_params=None, **predict_params):
-    reader_params = reader_params or {}
+def create_weight_reader_by_predictor(predictor, batch_size=32, **predict_params):
     name = predictor.name
-    func_predict = lambda files: predictor(files, **predict_params)
+    func_predict = lambda files: predictor(files, top=1, **predict_params)
     weights = predictor.weights
-    return WeightReader(name, func_predict, weights, **reader_params)
+    return WeightReader(name, func_predict, weights, batch_size=batch_size)
 
 
 class WeightReader(object):
@@ -97,7 +96,7 @@ class WeightReader(object):
 if __name__ == '__main__':
     predictor = KerasPredictor(XceptionClassifier(), None)
     reader_params = {'batch_size': 32}
-    reader = create_weight_reader_by_predictor(predictor, reader_params, top=1)
+    reader = create_weight_reader_by_predictor(predictor)
     model_weights = reader.get_model_weights()
     print model_weights.shape
     print model_weights

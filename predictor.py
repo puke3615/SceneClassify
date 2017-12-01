@@ -2,6 +2,7 @@ from classifier_base import BaseClassifier
 from classifier_xception import XceptionClassifier
 from classifier_vgg16 import VGG16Classifier
 from im_utils import *
+import weight_reader
 from config import *
 import numpy as np
 import config
@@ -63,14 +64,13 @@ class IntegratedPredictor(object):
     POLICIES = ['avg', 'model_weight', 'label_weight', 'ada_boost']
     DEFAULT_POLICY = 'avg'
 
-    def __init__(self, predictors, policy='avg', weights=None, standard=False,
-                 model_weight=None, label_weight=None):
+    def __init__(self, predictors, policy='avg', weights=None, standard=False):
         self.predictors = predictors
         self.policy = policy if policy in self.POLICIES else self.DEFAULT_POLICY
         self.weights = weights
         self.standard = standard
-        self.model_weight = model_weight
-        self.label_weight = label_weight
+        self.model_weight = None
+        self.label_weight = None
 
     def __call__(self, files, top=3, return_with_prob=False, **kwargs):
         if isinstance(files, str):
@@ -82,21 +82,33 @@ class IntegratedPredictor(object):
         # parse predictions
         return parse_prediction(files, integrated_predictions, top, return_with_prob)
 
+    def _parse_predictor(self, func_map):
+        return [func_map(weight_reader.create_weight_reader_by_predictor(predictor))
+                for predictor in self.predictors]
+
     def integrated_prob(self, predictions):
         predictions = np.array(predictions)
         result = None
         if self.policy == 'avg':
             result = np.mean(predictions, axis=0)
         elif self.policy == 'model_weight':
+            if not self.model_weight:
+                self.model_weight = self._parse_predictor(lambda reader: reader.get_model_weights())
             assert self.model_weight, 'The weights is None.'
             assert len(self.model_weight) == len(predictions), \
                 'The weights length %d is not equal with %d' % (len(self.model_weight), len(predictions))
             c_ns = self.model_weight
             result = np.sum(c_n * p_nj for c_n, p_nj in zip(c_ns, predictions))
         elif self.policy == 'label_weight':
+            if not self.label_weight:
+                self.label_weight = self._parse_predictor(lambda reader: reader.get_label_weights())
             c_njs = self.label_weight
             result = np.sum(c_nj * p_nj for c_nj, p_nj in zip(c_njs, predictions))
         elif self.policy == 'ada_boost':
+            if not self.model_weight:
+                self.model_weight = self._parse_predictor(lambda reader: reader.get_model_weights())
+            if not self.label_weight:
+                self.label_weight = self._parse_predictor(lambda reader: reader.get_label_weights())
             c_ns = self.model_weight
             c_njs = self.label_weight
             alphas = [np.log(c_n / (1 - c_n + 1e-6)) / 2 for c_n in c_ns]
