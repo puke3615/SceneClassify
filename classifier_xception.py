@@ -25,7 +25,7 @@ class XceptionClassifier(BaseClassifier):
         return model
 
     def data_generator(self, path_image, train=True, random_prob=1., **kwargs):
-        BaseClassifier.data_generator(self, path_image, train, random_prob, **kwargs)
+        return BaseClassifier.data_generator(self, path_image, train, random_prob, **kwargs)
 
 if __name__ == '__main__':
     classifier = XceptionClassifier(lr=1e-3, weights_mode='loss')
