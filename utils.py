@@ -3,6 +3,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.applications.xception import preprocess_input
 import keras.backend as K
 import tensorflow as tf
+import numpy as np
 import config
 import os
 
@@ -76,6 +77,15 @@ def get_best_weights(path_weights, mode='acc', postfix='.h5'):
     else:
         print('No weights with metric found, choose first file %s.' % target)
     return os.path.join(path_weights, target)
+
+
+def is_multi_predictions(predictions):
+    if isinstance(predictions, np.ndarray):
+        return len(predictions.shape) == 3
+    element = predictions[0][0]
+    return isinstance(element, list) \
+           or isinstance(element, tuple) \
+           or isinstance(element, np.ndarray)
 
 
 def preprocess_image(im, width, height, train=True):

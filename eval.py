@@ -5,25 +5,33 @@ from classifier_resnet import *
 from classifier_vgg16 import *
 from classifier_vgg19 import *
 from predictor import *
-from PIL import Image
 from config import *
 import numpy as np
 import im_utils
 import utils
 import json
 import time
+import sys
 import os
 
 
 # noinspection PyTypeChecker
-def dump_json(predictor, save_path=PATH_JSON_DUMP, target_dir=PATH_VAL_IMAGES, batch_size=16):
-    result = eval_predictor(predictor, target_dir, batch_size, dump_json_handler)
-    dir = os.path.dirname(save_path)
-    if not os.path.exists(dir):
-        os.makedirs(dir)
-    with open(save_path, 'w') as f:
-        json.dump(result, f)
-        print('Dump finished.')
+def dump_json(predictor, target_dir=PATH_VAL_IMAGES, batch_size=16):
+    if isinstance(predictor, IntegratedPredictor):
+        path_json_dumps = [CONTEXT(predictor.name, policy=policy)['path_json_dump'] for policy in predictor.policies]
+    else:
+        path_json_dumps = [CONTEXT(predictor.name)['path_json_dump']]
+    results, return_array = eval_predictor(predictor, target_dir, batch_size, dump_json_handler)
+    assert len(results) == len(path_json_dumps), 'The result length is not equal with path_json_dumps\'s.'
+
+    for result, save_path in zip(results, path_json_dumps):
+        dir = os.path.dirname(save_path)
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+        with open(save_path, 'w') as f:
+            json.dump(result, f)
+            print('Dump %s finished.' % save_path)
+    return path_json_dumps if return_array else path_json_dumps[0]
 
 
 def dump_json_handler(image_id, label_id):
@@ -34,10 +42,15 @@ def default_handler(image_id, label_id):
     return image_id, label_id
 
 
+class Flag:
+    value = True
+
+
 def eval_predictor(func_predict, target_dir=PATH_VAL_IMAGES,
                    batch_size=32, item_handler=default_handler):
     print('Start eval predictor...')
-    result = []
+    results = []
+    return_array = Flag()
     images = utils.get_files(target_dir)
     n_images = len(images)
     n_batch = n_images // batch_size
@@ -45,24 +58,28 @@ def eval_predictor(func_predict, target_dir=PATH_VAL_IMAGES,
 
     def predict_batch(start, end):
         predictions = func_predict(images[start: end])
+        if not utils.is_multi_predictions(predictions):
+            predictions = [predictions]
+            return_array.value = False
+        if len(results) == 0:
+            for i in range(len(predictions)):
+                results.append([])
+        else:
+            assert len(results) == len(predictions), 'The predictions length is not equal with last time\'s.'
         image_ids = [os.path.basename(image) for image in images[start: end]]
-        return [item_handler(image_ids[i], predictions[i]) for i in range(end - start)]
+        for index, prediction in enumerate(predictions):
+            results[index].extend([item_handler(image_ids[i], prediction[i]) for i in range(end - start)])
+            sys.stdout.write('\rProcessing %d/%d' % (end, n_images))
+            sys.stdout.flush()
 
-    import sys
     for batch in range(n_batch):
         index = batch * batch_size
-        batch_result = predict_batch(index, index + batch_size)
-        result.extend(batch_result)
-        sys.stdout.write('\rProcessing %d/%d' % (index + batch_size, n_images))
-        sys.stdout.flush()
+        predict_batch(index, index + batch_size)
     if n_last_batch:
         index = n_batch * batch_size
-        batch_result = predict_batch(index, index + n_last_batch)
-        result.extend(batch_result)
-        sys.stdout.write('\rProcessing %d/%d' % (index + n_last_batch, n_images))
-        sys.stdout.flush()
+        predict_batch(index, index + n_last_batch)
     sys.stdout.write('\n')
-    return result
+    return results if return_array.value else results[0], return_array.value
 
 
 def __load_data(submit_file, reference_file, result):
@@ -124,7 +141,7 @@ def evaluate(eval_json, target_json):
 DUMP_JSON = True
 EVAL = True
 MODE = None  # ['train', 'val', 'test', 'flip', None]
-INTEGRATED_POLICY = 'avg'  # ['avg', 'model_weight', 'label_weight', 'ada_boost']
+INTEGRATED_POLICY = 'label_weight'  # ['avg', 'model_weight', 'label_weight', 'ada_boost']
 if __name__ == '__main__':
     if DUMP_JSON:
         try:
@@ -138,10 +155,17 @@ if __name__ == '__main__':
                 KerasPredictor(XceptionClassifier(), MODE),
                 KerasPredictor(InceptionV3Classifier(), MODE),
                 KerasPredictor(InceptionRestNetV2Classifier(), MODE),
-            ], policy=INTEGRATED_POLICY)
+            ], policies=INTEGRATED_POLICY)
 
-            dump_json(predictor, batch_size=128)
+            path_json_dumps = dump_json(predictor, batch_size=128)
+            if not isinstance(path_json_dumps, list):
+                path_json_dumps = [path_json_dumps]
         finally:
             im_utils.recycle_pool()
+    else:
+        root_path = os.path.dirname(os.path.dirname(CONTEXT('mock')['path_json_dump']))
+        path_json_dumps = utils.get_files(root_path)
     if EVAL:
-        evaluate(PATH_JSON_DUMP, PATH_VAL_JSON)
+        for json_path in path_json_dumps:
+            print('\n[%s]' % os.path.basename(json_path))
+            evaluate(json_path, PATH_VAL_JSON)

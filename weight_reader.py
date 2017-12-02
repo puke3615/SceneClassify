@@ -65,7 +65,7 @@ class WeightReader(object):
         return os.path.join(self.predictor_cache_dir, filename)
 
     def perform_eval(self):
-        predictions = eval.eval_predictor(self.func_predict, batch_size=self.batch_size)
+        predictions, _ = eval.eval_predictor(self.func_predict, batch_size=self.batch_size)
         predictions = {image_id: label_ids[0] for image_id, label_ids in predictions}
         image2label = {}
         with open(self.ref_file, 'r') as f:

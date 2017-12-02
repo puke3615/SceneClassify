@@ -41,6 +41,8 @@ def CONTEXT(name, **kwargs):
         'summary': 'log/%s' % name,
         'predictor_cache_dir': 'cache/%s' % name,
         'load_imagenet_weights': is_windows(),
+        'path_json_dump': 'eval_json/%s/result%s.json' % (
+            name, ('_' + kwargs['policy']) if kwargs.__contains__('policy') else ''),
     }
 
 

@@ -62,15 +62,27 @@ class KerasPredictor(Predictor):
 
 class IntegratedPredictor(object):
     POLICIES = ['avg', 'model_weight', 'label_weight', 'ada_boost']
-    DEFAULT_POLICY = 'avg'
 
-    def __init__(self, predictors, policy='avg', weights=None, standard=False):
+    def __init__(self, predictors, policies='avg', weights=None, standard=False):
         self.predictors = predictors
-        self.policy = policy if policy in self.POLICIES else self.DEFAULT_POLICY
+        self.name = '[%s]' % ('#'.join([predictor.name for predictor in predictors]))
+        if not isinstance(policies, list) and not isinstance(policies, tuple):
+            policies = [policies]
+            self._return_array = False
+        else:
+            self._return_array = True
+        self.check_policies(policies)
+        self.policies = policies
         self.weights = weights
         self.standard = standard
         self.model_weight = None
         self.label_weight = None
+
+    def check_policies(self, policies):
+        for policy in policies:
+            if policy not in self.POLICIES:
+                raise Exception('Not support for "%s" policy. Choose from [%s].'
+                                % (policy, ', '.join(self.POLICIES)))
 
     def __call__(self, files, top=3, return_with_prob=False, **kwargs):
         if isinstance(files, str):
@@ -78,20 +90,24 @@ class IntegratedPredictor(object):
         # get prediction of every predictor
         predictions = [predictor.perform_predict(files, **kwargs) for predictor in self.predictors]
         # integrated predictions
-        integrated_predictions = self.integrated_prob(predictions)
+        final_predictions = self.integrated_predictions(predictions)
         # parse predictions
-        return parse_prediction(files, integrated_predictions, top, return_with_prob)
+        top_predictions = [parse_prediction(files, item_prediction, top, return_with_prob)
+                           for item_prediction in final_predictions]
+        return top_predictions if self._return_array else top_predictions[0]
 
     def _parse_predictor(self, func_map):
         return [func_map(weight_reader.create_weight_reader_by_predictor(predictor))
                 for predictor in self.predictors]
 
-    def integrated_prob(self, predictions):
+    def integrated_predictions(self, predictions):
         predictions = np.array(predictions)
-        result = None
-        if self.policy == 'avg':
+        return [self._perform_integrated(predictions, policy) for policy in self.policies]
+
+    def _perform_integrated(self, predictions, policy):
+        if policy == 'avg':
             result = np.mean(predictions, axis=0)
-        elif self.policy == 'model_weight':
+        elif policy == 'model_weight':
             if not self.model_weight:
                 self.model_weight = self._parse_predictor(lambda reader: reader.get_model_weights())
             assert self.model_weight, 'The weights is None.'
@@ -99,12 +115,12 @@ class IntegratedPredictor(object):
                 'The weights length %d is not equal with %d' % (len(self.model_weight), len(predictions))
             c_ns = self.model_weight
             result = np.sum(c_n * p_nj for c_n, p_nj in zip(c_ns, predictions))
-        elif self.policy == 'label_weight':
+        elif policy == 'label_weight':
             if not self.label_weight:
                 self.label_weight = self._parse_predictor(lambda reader: reader.get_label_weights())
             c_njs = self.label_weight
             result = np.sum(c_nj * p_nj for c_nj, p_nj in zip(c_njs, predictions))
-        elif self.policy == 'ada_boost':
+        elif policy == 'ada_boost':
             if not self.model_weight:
                 self.model_weight = self._parse_predictor(lambda reader: reader.get_model_weights())
             if not self.label_weight:
@@ -113,9 +129,9 @@ class IntegratedPredictor(object):
             c_njs = self.label_weight
             alphas = [np.log(c_n / (1 - c_n + 1e-6)) / 2 for c_n in c_ns]
             result = np.sum(c_nj * p_nj * alpha for alpha, c_nj, p_nj in zip(alphas, c_njs, predictions))
-        if result is None:
-            raise 'Not support for policy named "%s".' % self.policy
-        elif self.standard:
+        else:
+            raise 'Not support for policy named "%s".' % policy
+        if self.standard:
             denominators = np.sum(result, axis=1)
             result = [r / denominator for r, denominator in zip(result, denominators)]
         return result
