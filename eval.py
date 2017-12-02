@@ -18,7 +18,8 @@ import os
 # noinspection PyTypeChecker
 def dump_json(predictor, target_dir=PATH_VAL_IMAGES, batch_size=16):
     if isinstance(predictor, IntegratedPredictor):
-        path_json_dumps = [CONTEXT(predictor.name, policy=policy)['path_json_dump'] for policy in predictor.policies]
+        n_predictors = len(predictor.index2combine_name)
+        path_json_dumps = [CONTEXT(predictor.index2combine_name[i], policy=predictor.index2policy[i])['path_json_dump'] for i in range(n_predictors)]
     else:
         path_json_dumps = [CONTEXT(predictor.name)['path_json_dump']]
     results, return_array = eval_predictor(predictor, target_dir, batch_size, dump_json_handler)
@@ -114,7 +115,7 @@ def __eval_result(submit_dict, ref_dict, result):
         if value in submit_dict[key][:3]:
             right_count += 1
 
-    result['score'] = str(float(right_count) / max(len(ref_dict), 1e-5))
+    result['score'] = float(right_count) / max(len(ref_dict), 1e-5)
     return result
 
 
@@ -122,7 +123,6 @@ def evaluate(eval_json, target_json):
     if not os.path.exists(eval_json):
         raise Exception('Submit result "%s" not found. Call dump_json to dump result first.' % PATH_JSON_DUMP)
     result = {'error': [], 'warning': [], 'score': None}
-    START_TIME = time.time()
     SUBMIT = {}
     REF = {}
     try:
@@ -133,16 +133,18 @@ def evaluate(eval_json, target_json):
         result = __eval_result(SUBMIT, REF, result)
     except Exception as error:
         result['error'].append(str(error))
-    print('Evaluation time of your result: %f s' % (time.time() - START_TIME))
-    print(result)
-    print('Score is %s' % result['score'])
+    if result['warning'] or result['error']:
+        print(result)
+    print('Score is %s.' % result['score'])
+    return result['score']
 
 
 DUMP_JSON = True
 EVAL = True
-MODE = None  # ['train', 'val', 'test', 'flip', None]
-INTEGRATED_POLICY = 'label_weight'  # ['avg', 'model_weight', 'label_weight', 'ada_boost']
+MODE = 'flip'  # ['train', 'val', 'test', 'flip', None]
+INTEGRATED_POLICY = ['avg', 'model_weight', 'label_weight', 'ada_boost']
 if __name__ == '__main__':
+    START_TIME = time.time()
     if DUMP_JSON:
         try:
             # single predictor
@@ -155,7 +157,7 @@ if __name__ == '__main__':
                 KerasPredictor(XceptionClassifier(), MODE),
                 KerasPredictor(InceptionV3Classifier(), MODE),
                 KerasPredictor(InceptionRestNetV2Classifier(), MODE),
-            ], policies=INTEGRATED_POLICY)
+            ], policies=INTEGRATED_POLICY, all_combine=True)
 
             path_json_dumps = dump_json(predictor, batch_size=128)
             if not isinstance(path_json_dumps, list):
@@ -166,6 +168,20 @@ if __name__ == '__main__':
         root_path = os.path.dirname(os.path.dirname(CONTEXT('mock')['path_json_dump']))
         path_json_dumps = utils.get_files(root_path)
     if EVAL:
+        scores = []
+        model_names = []
         for json_path in path_json_dumps:
-            print('\n[%s]' % os.path.basename(json_path))
-            evaluate(json_path, PATH_VAL_JSON)
+            filename = os.path.basename(json_path)
+            policy = filename.replace('result_', '').replace('.json', '') if filename.__contains__('result_') else ''
+            combine_name = os.path.basename(os.path.dirname(json_path))
+            model_name = '%s%s' % (combine_name, ('_%s' % policy) if policy else '')
+            print('\n%s' % model_name)
+            scores.append(evaluate(json_path, PATH_VAL_JSON))
+            model_names.append(model_name)
+
+        sort_index = np.argsort(scores)[::-1]
+        print('\n[Sorted by scores:]')
+        for index in sort_index:
+            print('%.16f, %s' % (scores[index], model_names[index]))
+
+    print('\nEvaluation time of your result: %f s.' % (time.time() - START_TIME))

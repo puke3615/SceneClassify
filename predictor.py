@@ -6,6 +6,7 @@ import weight_reader
 from config import *
 import numpy as np
 import config
+import utils
 import os
 
 
@@ -60,51 +61,94 @@ class KerasPredictor(Predictor):
         Predictor.__init__(self, self.model.predict, w, mode, batch_handler)
 
 
+POLICIES = ['avg', 'model_weight', 'label_weight', 'ada_boost']
 class IntegratedPredictor(object):
-    POLICIES = ['avg', 'model_weight', 'label_weight', 'ada_boost']
 
-    def __init__(self, predictors, policies='avg', weights=None, standard=False):
+    def __init__(self, predictors, policies=POLICIES, weights=None, standard=False, all_combine=False):
+        self._check_policies(policies)
         self.predictors = predictors
-        self.name = '[%s]' % ('#'.join([predictor.name for predictor in predictors]))
-        if not isinstance(policies, list) and not isinstance(policies, tuple):
-            policies = [policies]
-            self._return_array = False
-        else:
-            self._return_array = True
-        self.check_policies(policies)
         self.policies = policies
         self.weights = weights
         self.standard = standard
+        self.all_combine = all_combine
+
         self.model_weight = None
         self.label_weight = None
+        self.index2combine_name = {}
+        self.index2policy = {}
+        self.combine_names = []
 
-    def check_policies(self, policies):
+        self.names = [predictor.name for predictor in predictors]
+        self.predictors_list = utils.all_combines(predictors) if all_combine else [predictors]
+        self._parse_predictors_name()
+
+    def _parse_predictors_name(self):
+        index = 0
+        for predictors in self.predictors_list:
+            combine_name = self.get_name_by_predictors(predictors)
+            self.combine_names.append(combine_name)
+            if len(predictors) == 1:
+                self.index2combine_name[index] = combine_name
+                self.index2policy[index] = ''
+                index += 1
+            else:
+                for policy in self.policies:
+                    self.index2combine_name[index] = combine_name
+                    self.index2policy[index] = policy
+                    index += 1
+
+    @staticmethod
+    def get_name_by_predictors(predictors):
+        return '[%s]' % ('#'.join([predictor.name for predictor in predictors]))
+
+    def _check_policies(self, policies):
         for policy in policies:
-            if policy not in self.POLICIES:
+            if policy not in POLICIES:
                 raise Exception('Not support for "%s" policy. Choose from [%s].'
-                                % (policy, ', '.join(self.POLICIES)))
+                                % (policy, ', '.join(POLICIES)))
 
     def __call__(self, files, top=3, return_with_prob=False, **kwargs):
         if isinstance(files, str):
             files = [files]
         # get prediction of every predictor
-        predictions = [predictor.perform_predict(files, **kwargs) for predictor in self.predictors]
+        predictions_dict = {predictor.name: predictor.perform_predict(files, **kwargs) for predictor in self.predictors}
         # integrated predictions
-        final_predictions = self.integrated_predictions(predictions)
+        final_predictions_dict = self.integrated_predictions(predictions_dict)
         # parse predictions
-        top_predictions = [parse_prediction(files, item_prediction, top, return_with_prob)
-                           for item_prediction in final_predictions]
-        return top_predictions if self._return_array else top_predictions[0]
+        top_predictions = []
+        for combine_name in self.combine_names:
+            item_predictions = final_predictions_dict[combine_name]
+            top_predictions.extend([parse_prediction(files, item_prediction, top, return_with_prob)
+                               for item_prediction in item_predictions])
+        return top_predictions
 
     def _parse_predictor(self, func_map):
-        return [func_map(weight_reader.create_weight_reader_by_predictor(predictor))
-                for predictor in self.predictors]
+        return {predictor.name: func_map(weight_reader.create_weight_reader_by_predictor(predictor))
+                for predictor in self.predictors}
 
-    def integrated_predictions(self, predictions):
-        predictions = np.array(predictions)
-        return [self._perform_integrated(predictions, policy) for policy in self.policies]
+    def integrated_predictions(self, predictions_dict):
+        integrated_predictions_dict = {}
+        index = 0
+        for predictors, combine_name in zip(self.predictors_list, self.combine_names):
+            # single predictor, don't need to combine
+            if len(predictors) == 1:
+                integrated_predictions_dict[combine_name] = [predictions_dict[predictors[0].name]]
+                self.index2combine_name[index] = combine_name
+                self.index2policy[index] = ''
+                index += 1
+            else:
+                predictions = [predictions_dict[predictor.name] for predictor in predictors]
+                predictions = np.array(predictions)
+                result = []
+                for policy in self.policies:
+                    result.append(self._perform_integrated(predictors, predictions, policy))
+                    self.index2combine_name[index] = combine_name
+                    self.index2policy[index] = policy
+                    index += 1
+                integrated_predictions_dict[combine_name] = result
+        return integrated_predictions_dict
 
-    def _perform_integrated(self, predictions, policy):
+    def _perform_integrated(self, predictors, predictions, policy):
         if policy == 'avg':
             result = np.mean(predictions, axis=0)
         elif policy == 'model_weight':
@@ -113,20 +157,20 @@ class IntegratedPredictor(object):
             assert self.model_weight, 'The weights is None.'
             assert len(self.model_weight) == len(predictions), \
                 'The weights length %d is not equal with %d' % (len(self.model_weight), len(predictions))
-            c_ns = self.model_weight
+            c_ns = [self.model_weight[predictor.name] for predictor in predictors]
             result = np.sum(c_n * p_nj for c_n, p_nj in zip(c_ns, predictions))
         elif policy == 'label_weight':
             if not self.label_weight:
                 self.label_weight = self._parse_predictor(lambda reader: reader.get_label_weights())
-            c_njs = self.label_weight
+            c_njs = [self.label_weight[predictor.name] for predictor in predictors]
             result = np.sum(c_nj * p_nj for c_nj, p_nj in zip(c_njs, predictions))
         elif policy == 'ada_boost':
             if not self.model_weight:
                 self.model_weight = self._parse_predictor(lambda reader: reader.get_model_weights())
             if not self.label_weight:
                 self.label_weight = self._parse_predictor(lambda reader: reader.get_label_weights())
-            c_ns = self.model_weight
-            c_njs = self.label_weight
+            c_ns = [self.model_weight[predictor.name] for predictor in predictors]
+            c_njs = [self.label_weight[predictor.name] for predictor in predictors]
             alphas = [np.log(c_n / (1 - c_n + 1e-6)) / 2 for c_n in c_ns]
             result = np.sum(c_nj * p_nj * alpha for alpha, c_nj, p_nj in zip(alphas, c_njs, predictions))
         else:
@@ -135,6 +179,8 @@ class IntegratedPredictor(object):
             denominators = np.sum(result, axis=1)
             result = [r / denominator for r, denominator in zip(result, denominators)]
         return result
+
+
 
 
 if __name__ == '__main__':

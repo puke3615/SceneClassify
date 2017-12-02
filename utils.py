@@ -1,3 +1,5 @@
+from itertools import combinations
+
 from keras.applications.imagenet_utils import preprocess_input
 from keras.preprocessing.image import ImageDataGenerator
 from keras.applications.xception import preprocess_input
@@ -86,6 +88,14 @@ def is_multi_predictions(predictions):
     return isinstance(element, list) \
            or isinstance(element, tuple) \
            or isinstance(element, np.ndarray)
+
+
+def all_combines(data):
+    result = []
+    for i in range(len(data)):
+        combines = list(combinations(data, i + 1))
+        result.extend(combines)
+    return result
 
 
 def preprocess_image(im, width, height, train=True):
