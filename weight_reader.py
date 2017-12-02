@@ -4,6 +4,7 @@ from classifier_inception_v3 import *
 from classifier_xception import *
 from classifier_resnet import *
 from classifier_vgg16 import *
+from classifier_vgg19 import *
 from predictor import *
 from config import *
 import numpy as np
@@ -100,12 +101,13 @@ class WeightReader(object):
 
 
 if __name__ == '__main__':
+    MODE = None
     predictors = [
-        KerasPredictor(XceptionTrainableClassifier('xception_aug'), None),
-        KerasPredictor(InceptionRestNetV2Classifier(), None),
-        KerasPredictor(InceptionV3Classifier(), None),
-        KerasPredictor(VGG16Classifier(), None),
-        KerasPredictor(RestNetClassifier('resnet_adam'), None),
+        KerasPredictor(VGG19Classifier(), MODE),
+        KerasPredictor(RestNetClassifier(), MODE),
+        KerasPredictor(XceptionClassifier(), MODE),
+        KerasPredictor(InceptionV3Classifier(), MODE),
+        KerasPredictor(InceptionRestNetV2Classifier(), MODE),
     ]
 
     for predictor in predictors:

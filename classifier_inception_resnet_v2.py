@@ -25,5 +25,5 @@ class InceptionRestNetV2Classifier(BaseClassifier):
         return BaseClassifier.data_generator(self, path_image, train, random_prob, **kwargs)
 
 if __name__ == '__main__':
-    classifier = InceptionRestNetV2Classifier(lr=1e-3)
+    classifier = InceptionRestNetV2Classifier('inception_resnet_v2_50', lr=1e-5)
     classifier.train()
