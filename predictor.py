@@ -155,9 +155,9 @@ class IntegratedPredictor(object):
             if not self.model_weight:
                 self.model_weight = self._parse_predictor(lambda reader: reader.get_model_weights())
             assert self.model_weight, 'The weights is None.'
-            assert len(self.model_weight) == len(predictions), \
-                'The weights length %d is not equal with %d' % (len(self.model_weight), len(predictions))
             c_ns = [self.model_weight[predictor.name] for predictor in predictors]
+            assert len(c_ns) == len(predictions), \
+                'The weights length %d is not equal with %d' % (len(self.model_weight), len(predictions))
             result = np.sum(c_n * p_nj for c_n, p_nj in zip(c_ns, predictions))
         elif policy == 'label_weight':
             if not self.label_weight:
