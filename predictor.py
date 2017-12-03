@@ -62,13 +62,16 @@ class KerasPredictor(Predictor):
 
 
 """
-A: avg, 均值
-B: model_weight, 按模型acc加权
-C: label_weight, 按类别acc加权
-D: ada_boost, Adaboost方式
-P: prediction_weight, 按预测值本身加权
+A:  avg, 均值
+B:  model_weight, 按模型acc加权
+C:  label_weight, 按类别acc加权
+D:  ada_boost, Adaboost方式
+P:  prediction_weight, 按预测值本身加权
+M:  Max, 
+MM: Max with model weight
+ML: Max with label weight
 """
-POLICIES = ['A', 'B', 'C', 'D', 'P']
+POLICIES = ['A', 'B', 'C', 'D', 'P', 'M', 'MM', 'MP']
 
 
 class IntegratedPredictor(object):
@@ -183,6 +186,19 @@ class IntegratedPredictor(object):
             predictions_all = np.sum(predictions, axis=0)
             predictions_weight = predictions / predictions_all
             result = np.sum(predictions_weight * predictions, axis=0)
+        elif policy == 'M':
+            result = np.max(predictions, axis=0)
+        elif policy == 'MM':
+            self._parse_mode_weight()
+            assert self.model_weight, 'The weights is None.'
+            model_weight = [self.model_weight[predictor.name] for predictor in predictors]
+            assert len(model_weight) == len(predictions), \
+                'The weights length %d is not equal with %d' % (len(self.model_weight), len(predictions))
+            result = np.max([d * w for d, w in zip(predictions, model_weight)], axis=0)
+        elif policy == 'ML':
+            self._parse_label_weight()
+            label_weight = [self.label_weight[predictor.name] for predictor in predictors]
+            result = np.max([c_nj * p_nj for c_nj, p_nj in zip(label_weight, predictions)], axis=0)
         else:
             raise 'Not support for policy named "%s".' % policy
         if self.standard:

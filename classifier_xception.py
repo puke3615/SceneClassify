@@ -28,5 +28,5 @@ class XceptionClassifier(BaseClassifier):
         return BaseClassifier.data_generator(self, path_image, train, random_prob, **kwargs)
 
 if __name__ == '__main__':
-    classifier = XceptionClassifier(lr=1e-5)
+    classifier = XceptionClassifier(lr=1e-6)
     classifier.train()

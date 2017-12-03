@@ -19,7 +19,8 @@ import os
 def dump_json(predictor, target_dir=PATH_VAL_IMAGES, batch_size=16):
     if isinstance(predictor, IntegratedPredictor):
         n_predictors = len(predictor.index2combine_name)
-        path_json_dumps = [CONTEXT(predictor.index2combine_name[i], policy=predictor.index2policy[i])['path_json_dump'] for i in range(n_predictors)]
+        path_json_dumps = [CONTEXT(predictor.index2combine_name[i], policy=predictor.index2policy[i])['path_json_dump']
+                           for i in range(n_predictors)]
     else:
         path_json_dumps = [CONTEXT(predictor.name)['path_json_dump']]
     results, return_array = eval_predictor(predictor, target_dir, batch_size, dump_json_handler)
@@ -142,7 +143,7 @@ def evaluate(eval_json, target_json):
 DUMP_JSON = True
 EVAL = True
 MODE = 'flip'  # ['train', 'val', 'test', 'flip', None]
-INTEGRATED_POLICY = ['A', 'B', 'C', 'D'] # ['A', 'B', 'C', 'D', 'P']
+INTEGRATED_POLICY = ['A', 'B', 'C', 'D', 'P', 'M', 'MM', 'MP']  # POLICIES = ['A', 'B', 'C', 'D', 'P', 'M', 'MM', 'MP']
 if __name__ == '__main__':
     START_TIME = time.time()
     if DUMP_JSON:
