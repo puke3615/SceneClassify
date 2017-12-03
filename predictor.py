@@ -71,7 +71,7 @@ M:  Max,
 MM: Max with model weight
 ML: Max with label weight
 """
-POLICIES = ['A', 'B', 'C', 'D', 'P', 'M', 'MM', 'MP']
+POLICIES = ['A', 'B', 'C', 'D', 'E', 'P', 'M', 'MM', 'ML']
 
 
 class IntegratedPredictor(object):
@@ -182,6 +182,12 @@ class IntegratedPredictor(object):
             c_njs = [self.label_weight[predictor.name] for predictor in predictors]
             alphas = [np.log(c_n / (1 - c_n + 1e-6)) / 2 for c_n in c_ns]
             result = np.sum(c_nj * p_nj * alpha for alpha, c_nj, p_nj in zip(alphas, c_njs, predictions))
+        elif policy == 'E':
+            self._parse_mode_weight()
+            self._parse_label_weight()
+            c_ns = [self.model_weight[predictor.name] for predictor in predictors]
+            c_njs = [self.label_weight[predictor.name] for predictor in predictors]
+            result = np.sum(c_nj * p_nj * c_n for c_n, c_nj, p_nj in zip(c_ns, c_njs, predictions))
         elif policy == 'P':
             predictions_all = np.sum(predictions, axis=0)
             predictions_weight = predictions / predictions_all

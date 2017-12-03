@@ -143,7 +143,8 @@ def evaluate(eval_json, target_json):
 DUMP_JSON = True
 EVAL = True
 MODE = 'flip'  # ['train', 'val', 'test', 'flip', None]
-INTEGRATED_POLICY = ['A', 'B', 'C', 'D', 'P', 'M', 'MM', 'MP']  # POLICIES = ['A', 'B', 'C', 'D', 'P', 'M', 'MM', 'MP']
+# POLICIES = ['A', 'B', 'C', 'D', 'E', 'P', 'M', 'MM', 'ML']
+INTEGRATED_POLICY = ['A', 'B', 'C', 'D', 'E']
 if __name__ == '__main__':
     START_TIME = time.time()
     if DUMP_JSON:
@@ -153,8 +154,8 @@ if __name__ == '__main__':
 
             # integrated predictor
             predictor = IntegratedPredictor([
-                KerasPredictor(VGG19Classifier(), MODE),
-                KerasPredictor(RestNetClassifier(), MODE),
+                # KerasPredictor(VGG19Classifier(), MODE),
+                # KerasPredictor(RestNetClassifier(), MODE),
                 KerasPredictor(XceptionClassifier(), MODE),
                 KerasPredictor(InceptionV3Classifier(), MODE),
                 KerasPredictor(InceptionRestNetV2Classifier(), MODE),
