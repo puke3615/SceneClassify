@@ -140,8 +140,8 @@ def evaluate(eval_json, target_json):
     return result['score']
 
 
-PATH_TARGET = PATH_VAL_IMAGES
-# PATH_TARGET = PATH_TEST_B
+# PATH_TARGET = PATH_VAL_IMAGES
+PATH_TARGET = PATH_TEST_B
 DUMP_JSON = True
 EVAL = PATH_TARGET != PATH_TEST_B
 MODE = 'flip'  # ['train', 'val', 'test', 'flip', None]
@@ -159,7 +159,7 @@ if __name__ == '__main__':
                 # KerasPredictor(VGG19Classifier(), MODE),
                 # KerasPredictor(RestNetClassifier(), MODE),
                 KerasPredictor(XceptionClassifier(), MODE),
-                KerasPredictor(InceptionV3Classifier(), MODE),
+                # KerasPredictor(InceptionV3Classifier(), MODE),
                 KerasPredictor(InceptionRestNetV2Classifier(), MODE),
             ], policies=INTEGRATED_POLICY, all_combine=PATH_TARGET != PATH_TEST_B)
 
