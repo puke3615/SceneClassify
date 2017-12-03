@@ -50,13 +50,16 @@ def CONTEXT(name, **kwargs):
 if is_windows():
     PATH_TRAIN_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_train_20170904'
     PATH_VAL_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_validation_20170908'
+    PATH_TEST_B = 'G:/Dataset/SceneClassify/ai_challenger_scene_test_b_20170922/scene_test_b_images_20170922'
 elif is_mac():
     PATH_TRAIN_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_train_20170904'
     PATH_VAL_BASE = '/Users/zijiao/Desktop/ai_challenger_scene_validation_20170908'
+    PATH_TEST_B = ''
 elif is_linux():
     # 皮皮酱
     PATH_TRAIN_BASE = ''
     PATH_VAL_BASE = ''
+    PATH_TEST_B = ''
 else:
     raise Exception('No images configured on %s' % os_name)
 

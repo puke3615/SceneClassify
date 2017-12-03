@@ -140,11 +140,13 @@ def evaluate(eval_json, target_json):
     return result['score']
 
 
+PATH_TARGET = PATH_VAL_IMAGES
+# PATH_TARGET = PATH_TEST_B
 DUMP_JSON = True
-EVAL = True
+EVAL = PATH_TARGET != PATH_TEST_B
 MODE = 'flip'  # ['train', 'val', 'test', 'flip', None]
 # POLICIES = ['A', 'B', 'C', 'D', 'E', 'P', 'M', 'MM', 'ML']
-INTEGRATED_POLICY = ['A', 'B', 'C', 'D', 'E']
+INTEGRATED_POLICY = ['D'] if PATH_TARGET == PATH_TEST_B else ['A', 'B', 'C', 'D', 'E']
 if __name__ == '__main__':
     START_TIME = time.time()
     if DUMP_JSON:
@@ -159,9 +161,9 @@ if __name__ == '__main__':
                 KerasPredictor(XceptionClassifier(), MODE),
                 KerasPredictor(InceptionV3Classifier(), MODE),
                 KerasPredictor(InceptionRestNetV2Classifier(), MODE),
-            ], policies=INTEGRATED_POLICY, all_combine=True)
+            ], policies=INTEGRATED_POLICY, all_combine=PATH_TARGET != PATH_TEST_B)
 
-            path_json_dumps = dump_json(predictor, batch_size=128)
+            path_json_dumps = dump_json(predictor, batch_size=128, target_dir=PATH_TARGET)
             if not isinstance(path_json_dumps, list):
                 path_json_dumps = [path_json_dumps]
         finally:
