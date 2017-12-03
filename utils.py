@@ -98,6 +98,25 @@ def all_combines(data):
     return result
 
 
+def format_time(seconds):
+    if seconds < 60:
+        return '%.2f' % seconds
+
+    minutes = seconds / 60
+    seconds = seconds % 60
+    if minutes < 60:
+        return '%d m %.0f s' % (minutes, seconds)
+
+    hours = minutes / 60
+    minutes = minutes % 60
+    if hours < 24:
+        return '%dh %dm %.0fs' % (hours, minutes, seconds)
+
+    days = hours / 24
+    hours = hours % 24
+    return '%dd %dh %dm %.0fs' % (days, hours, minutes, seconds)
+
+
 def preprocess_image(im, width, height, train=True):
     size = min(im.shape[:2])
     im = tf.constant(im)

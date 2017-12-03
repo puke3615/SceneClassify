@@ -61,16 +61,26 @@ class KerasPredictor(Predictor):
         Predictor.__init__(self, self.model.predict, w, mode, batch_handler)
 
 
-POLICIES = ['avg', 'model_weight', 'label_weight', 'ada_boost']
-class IntegratedPredictor(object):
+"""
+A: avg, 均值
+B: model_weight, 按模型acc加权
+C: label_weight, 按类别acc加权
+D: ada_boost, Adaboost方式
+P: prediction_weight, 按预测值本身加权
+"""
+POLICIES = ['A', 'B', 'C', 'D', 'P']
 
-    def __init__(self, predictors, policies=POLICIES, weights=None, standard=False, all_combine=False):
+
+class IntegratedPredictor(object):
+    def __init__(self, predictors, policies=POLICIES, weights=None, standard=False, all_combine=False,
+                 use_weight_cache=True):
         self._check_policies(policies)
         self.predictors = predictors
         self.policies = policies
         self.weights = weights
         self.standard = standard
         self.all_combine = all_combine
+        self.use_weight_cache = use_weight_cache
 
         self.model_weight = None
         self.label_weight = None
@@ -119,7 +129,7 @@ class IntegratedPredictor(object):
         for combine_name in self.combine_names:
             item_predictions = final_predictions_dict[combine_name]
             top_predictions.extend([parse_prediction(files, item_prediction, top, return_with_prob)
-                               for item_prediction in item_predictions])
+                                    for item_prediction in item_predictions])
         return top_predictions
 
     def _parse_predictor(self, func_map):
@@ -149,30 +159,30 @@ class IntegratedPredictor(object):
         return integrated_predictions_dict
 
     def _perform_integrated(self, predictors, predictions, policy):
-        if policy == 'avg':
+        if policy == 'A':
             result = np.mean(predictions, axis=0)
-        elif policy == 'model_weight':
-            if not self.model_weight:
-                self.model_weight = self._parse_predictor(lambda reader: reader.get_model_weights())
+        elif policy == 'B':
+            self._parse_mode_weight()
             assert self.model_weight, 'The weights is None.'
             c_ns = [self.model_weight[predictor.name] for predictor in predictors]
             assert len(c_ns) == len(predictions), \
                 'The weights length %d is not equal with %d' % (len(self.model_weight), len(predictions))
             result = np.sum(c_n * p_nj for c_n, p_nj in zip(c_ns, predictions))
-        elif policy == 'label_weight':
-            if not self.label_weight:
-                self.label_weight = self._parse_predictor(lambda reader: reader.get_label_weights())
+        elif policy == 'C':
+            self._parse_label_weight()
             c_njs = [self.label_weight[predictor.name] for predictor in predictors]
             result = np.sum(c_nj * p_nj for c_nj, p_nj in zip(c_njs, predictions))
-        elif policy == 'ada_boost':
-            if not self.model_weight:
-                self.model_weight = self._parse_predictor(lambda reader: reader.get_model_weights())
-            if not self.label_weight:
-                self.label_weight = self._parse_predictor(lambda reader: reader.get_label_weights())
+        elif policy == 'D':
+            self._parse_mode_weight()
+            self._parse_label_weight()
             c_ns = [self.model_weight[predictor.name] for predictor in predictors]
             c_njs = [self.label_weight[predictor.name] for predictor in predictors]
             alphas = [np.log(c_n / (1 - c_n + 1e-6)) / 2 for c_n in c_ns]
             result = np.sum(c_nj * p_nj * alpha for alpha, c_nj, p_nj in zip(alphas, c_njs, predictions))
+        elif policy == 'P':
+            predictions_all = np.sum(predictions, axis=0)
+            predictions_weight = predictions / predictions_all
+            result = np.sum(predictions_weight * predictions, axis=0)
         else:
             raise 'Not support for policy named "%s".' % policy
         if self.standard:
@@ -180,7 +190,15 @@ class IntegratedPredictor(object):
             result = [r / denominator for r, denominator in zip(result, denominators)]
         return result
 
+    def _parse_label_weight(self):
+        if not self.label_weight:
+            self.label_weight = self._parse_predictor(
+                lambda reader: reader.get_label_weights(use_cache=self.use_weight_cache))
 
+    def _parse_mode_weight(self):
+        if not self.model_weight:
+            self.model_weight = self._parse_predictor(
+                lambda reader: reader.get_model_weights(use_cache=self.use_weight_cache))
 
 
 if __name__ == '__main__':

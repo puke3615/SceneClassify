@@ -18,20 +18,17 @@ class XceptionTrainableClassifier(BaseClassifier):
         weights = 'imagenet' if self.context['load_imagenet_weights'] else None
         model_xception = Xception(include_top=False, weights=weights,
                                   input_shape=(self.im_size, self.im_size, 3), pooling='avg')
-        for layer in model_xception.layers[:-10]:
-            layer.trainable = False
+        # for layer in model_xception.layers:
+        #     layer.trainable = False
         x = model_xception.output
         x = Dense(CLASSES, activation='softmax')(x)
         model = Model(inputs=model_xception.inputs, outputs=x)
         return model
 
-    def data_generator(self, path_image, train=True, random_prob=0.5, **kwargs):
+    def data_generator(self, path_image, train=True, random_prob=1.0, **kwargs):
         return BaseClassifier.data_generator(self, path_image, train, random_prob, **kwargs)
 
 
 if __name__ == '__main__':
-    classifier = XceptionTrainableClassifier(
-        name='xception_aug',
-        lr=1e-4,
-    )
+    classifier = XceptionTrainableClassifier(lr=1e-5, batch_size=8)
     classifier.train()

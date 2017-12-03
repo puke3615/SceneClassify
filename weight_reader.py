@@ -80,6 +80,7 @@ class WeightReader(object):
         for image, label in image2label.items():
             prediction = predictions[image]
             n_labels[prediction] += 1
+            # n_labels[label] += 1
             if prediction == label:
                 right_count += 1
                 n_right_labels[prediction] += 1
@@ -113,7 +114,7 @@ if __name__ == '__main__':
     for predictor in predictors:
         print('\n[%s]' % predictor.name)
         reader = create_weight_reader_by_predictor(predictor, batch_size=128)
-        model_weights = reader.get_model_weights()
+        model_weights = reader.get_model_weights(use_cache=True)
         label_weights = reader.get_label_weights()
         format_label_weights = label_weights + np.array(range(80))
         print(model_weights)

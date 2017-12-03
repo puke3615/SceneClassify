@@ -142,7 +142,7 @@ def evaluate(eval_json, target_json):
 DUMP_JSON = True
 EVAL = True
 MODE = 'flip'  # ['train', 'val', 'test', 'flip', None]
-INTEGRATED_POLICY = ['avg', 'model_weight', 'label_weight', 'ada_boost']
+INTEGRATED_POLICY = ['A', 'B', 'C', 'D'] # ['A', 'B', 'C', 'D', 'P']
 if __name__ == '__main__':
     START_TIME = time.time()
     if DUMP_JSON:
@@ -184,4 +184,5 @@ if __name__ == '__main__':
         for index in sort_index:
             print('%.16f, %s' % (scores[index], model_names[index]))
 
-    print('\nEvaluation time of your result: %f s.' % (time.time() - START_TIME))
+    time_str = utils.format_time(time.time() - START_TIME)
+    print('\nEvaluation time of your result: %s.' % time_str)
