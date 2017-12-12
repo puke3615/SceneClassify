@@ -1,3 +1,4 @@
+# coding=utf-8
 from classifier_base import BaseClassifier
 from classifier_xception import XceptionClassifier
 from classifier_vgg16 import VGG16Classifier
