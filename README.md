@@ -11,7 +11,7 @@
 
   打开`config.py`，找到下面的位置，根据自己的电脑系统在对应的位置配置上数据集路径
 
-  ```
+  ```python
   # image path
   if is_windows():
       PATH_TRAIN_BASE = 'G:/Dataset/SceneClassify/ai_challenger_scene_train_20170904'
