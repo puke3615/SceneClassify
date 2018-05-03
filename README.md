@@ -4,7 +4,7 @@
 
 # 快速接入
 
-* [下载数据集](https://challenger.ai/competition/scene/subject)
+* [下载数据集](https://challenger.ai/competition/scene/subject)，有朋友反馈官方链接失效，我在百度云又存放一份：链接: https://pan.baidu.com/s/1cjR-xhsCq8BD5nH7yQeiIA 密码: xfcp
 
 
 * 配置数据集路径
